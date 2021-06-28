@@ -21,7 +21,6 @@ class CoinBaseProExchange():
         self.market = market
         self.log = log
         self.base_url = 'https://api.pro.coinbase.com'
-        self.orders = self.get_filled_orders()
         self.product = self._get_product()
 
 
@@ -183,11 +182,13 @@ class CoinBaseProExchange():
         resp.raise_for_status()
 
     def get_last_action(self):
-        if len(self.orders) > 0:
-            return SignalAction.BUY if self.orders[0]['side'] == 'buy' else SignalAction.SELL
+        orders = self.get_filled_orders()
+        if len(orders) > 0:
+            return SignalAction.BUY if orders[0]['side'] == 'buy' else SignalAction.SELL
         return SignalAction.WAIT
 
 
     def get_last_buy_order(self):
-        orders = [o for o in self.orders if o['side'] == 'buy']
+        orders = self.get_filled_orders()
+        orders = [o for o in orders if o['side'] == 'buy']
         return orders[0] if len(orders) > 0 else None
