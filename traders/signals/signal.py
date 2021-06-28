@@ -1,6 +1,6 @@
-import matplotlib.pyplot as plt
-import matplotlib.ticker as ticker
 import pandas as pd
+import matplotlib.pyplot as plt
+
 
 from traders.signals.signal_type import SignalAction
 
