@@ -1,11 +1,23 @@
-import telegram
-from fileinput import FileInput
 
+import telegram
+from telegram.ext import Updater, CommandHandler, CallbackContext
+from os import walk
 
 class Telegram():
     def __init__(self, token='', client_id=''):
         self.bot = telegram.Bot(token)
         self.client_id = str(client_id)
+
+        updater = Updater(token)
+        def upload_graph(update: telegram.Update, context: CallbackContext):
+            curr = update.message.text.split(' ')[1]
+            for (dirpath, dirnames, filenames) in walk('graphs'):
+                for filename in filenames:
+                    if str(filename).lower().startswith(curr):
+                        self.bot.send_photo(chat_id=self.client_id, photo=open(f'graphs/{filename}', 'rb'))
+        updater.dispatcher.add_handler(CommandHandler('g', upload_graph))
+        updater.start_polling()
+
 
     def send(self, message='') -> str:
         try:
@@ -18,4 +30,5 @@ class Telegram():
         except Exception as err:
             print(err)
             return ''
+
 
