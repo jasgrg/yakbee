@@ -104,4 +104,5 @@ class Trader():
             plt.plot(action['time'], action['close'], 'g*' if action['action'] == SignalAction.BUY else 'r*', markersize=10, label='Buy' if action['action'] == SignalAction.BUY else 'Sell')
 
         plt.savefig(filename)
+        self.log.critical(f'file:{filename}')
 
