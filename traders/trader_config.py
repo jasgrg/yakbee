@@ -30,6 +30,7 @@ class TraderConfig():
         self.quote_currency = config['config']['quote_currency']
         self.granularity = config['config']['granularity']
         self.sell_at_loss = config['config'].get('sell_at_loss', 'True') == 'True'
+        self.min_gain_to_sell = config['config'].get('min_gain_to_sell', 0)
         self.live = config['live']
         self.buy_strategies = self.get_strategies(config['config']['buy_strategies'], log)
         self.sell_strategies = self.get_strategies(config['config']['sell_strategies'], log)

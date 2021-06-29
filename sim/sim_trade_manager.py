@@ -25,6 +25,7 @@ class SimTradeManager(TradeManager):
             for trade in trader.trades:
                 self.log.debug(f"{trader.config.name} | {trade['date']} | {trade['action']} | {trade['base_amt']} | {trade['quote_amt']} ")
             trader.render_strategies()
+            cur_date_time = self.start_date
 
     def create_traders(self, config: Config) -> []:
         traders = []

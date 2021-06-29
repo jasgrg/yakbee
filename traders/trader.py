@@ -55,7 +55,7 @@ class Trader():
                         self.log.debug('*** Strategy returned SELLs ***')
                         last_buy_order = self.exchange.get_last_buy_order()
 
-                        if self.config.sell_at_loss or last_buy_order is None or float(last_buy_order['price']) < close:
+                        if self.config.sell_at_loss or last_buy_order is None or close > (float(last_buy_order['price']) + ((self.config.min_gain_to_sell / 100) * float(last_buy_order['price']))):
 
                             self.last_action = SignalAction.SELL
 
@@ -68,7 +68,7 @@ class Trader():
                                 self.render(historical_data)
                             break
                         else:
-                            self.log.debug(f'Cannot sell at a loss : current price {close} : purchased price {last_buy_order["price"]}')
+                            self.log.debug(f'Cannot sell at a loss : current price {close} : purchased price {last_buy_order["price"]} : target {(float(last_buy_order["price"]) + ((self.config.min_gain_to_sell / 100) * float(last_buy_order["price"])))}')
 
 
     def get_historical_data(self, current_time):
