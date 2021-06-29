@@ -8,11 +8,15 @@ class DummyExchange():
         self.log = log
         self.config = config
         self.amounts = {
-            self.config.base_currency : 0,
-            self.config.quote_currency : 100
+            self.config.base_currency : 26,
+            self.config.quote_currency : 0
         }
-        self.last_order_a_buy = False
-        self.last_buy_order = None
+        self.last_order_a_buy = True
+        self.last_buy_order = {
+            'size': 26,
+            'price': 0.26,
+            'fee': .05
+        }
 
     def get_historic_data(self, granularity, start_date: datetime = None, end_date: datetime = None):
         return self.base_exchange.get_historic_data(granularity, start_date, end_date)

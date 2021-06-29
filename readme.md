@@ -93,6 +93,36 @@ trade with live funds.
   sell strategy returns a sell action then a sell is executed. In order for a strategy to return a sell action, *all* of the 
   signals within the strategy must return a sell signal.
 
+#### How it works
+
+###### Trade manager
+At the top level is the <code>trade_manager</code>. The trade manager holds a list of <code>traders</code>.
+Every 5 seconds the trademanager will loop through the list of traders and have them check 
+whether to trade or not and if so to execute the trade. Each trader only takes action if it has been *x* seconds
+since the last time it took action, where *x* is the granularity specified for the trader.
+
+###### Traders
+
+When it is time for the trader to take action, it begins by looping through the <code>buy_strategies</code>.
+If any of the buy strategies returns a *buy* action then the traders buys as much of the base currency
+as it has funds available to use. 
+
+If none of the buy strategies return a buy action then the trader will check the sell strategies.
+If any of the sell strategies returns a sell action then the trader will sell all of the base currency
+currently being held. If <code>sell_at_loss</code> is 0 then the trader will check the current price of the base currency.
+If the current price is less than the last purchase price the trader will not sell.
+
+
+###### Strategy
+
+A strategy is simply a list of signals. For the strategy to take action, all of the signals must agree on the action to 
+be taken.
+
+###### Signals
+
+A <code>signal</code> is a piece of code that looks at the history of the base currency and casts a vote to the strategy
+whether to buy, sell or wait.
+
 #### Execution
 
     % python3 yakbee.py

@@ -41,7 +41,8 @@ class Log():
 
     def critical(self, str):
         self.logger.critical(str)
-        self.telegram.send(str)
+        if self.telegram is not None:
+            self.telegram.send(str)
 
     def error(self, str):
         self.logger.error(str)

@@ -24,6 +24,7 @@ class SimTradeManager(TradeManager):
                 cur_date_time = cur_date_time + timedelta(seconds=trader.config.granularity)
             for trade in trader.trades:
                 self.log.debug(f"{trader.config.name} | {trade['date']} | {trade['action']} | {trade['base_amt']} | {trade['quote_amt']} ")
+            trader.render_strategies()
 
     def create_traders(self, config: Config) -> []:
         traders = []

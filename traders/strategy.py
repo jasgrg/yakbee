@@ -4,8 +4,11 @@ from traders.signals.signal_type import SignalAction
 class Strategy():
     def __init__(self, signals: []):
         self.signals = signals
+        self.historical_data = None
 
     def get_action(self, historical_data, close):
+        self.historical_data = historical_data
+
         action = SignalAction.WAIT
 
 
@@ -21,8 +24,8 @@ class Strategy():
         elif all(vote == SignalAction.SELL for vote in votes):
             action = SignalAction.SELL
 
-        # if action != SignalAction.WAIT:
-        #     for s in self.signals:
-        #         s.render(historical_data)
-
         return action
+
+    def render(self):
+        for s in self.signals:
+            s.render(self.historical_data)

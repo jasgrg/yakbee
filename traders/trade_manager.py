@@ -21,6 +21,7 @@ class TradeManager():
         for trader in self.traders:
             try:
                 trader.calculate_and_trade(time.time())
+                trader.render_strategies()
             except Exception as ex:
                 self.log.error(traceback.format_exc())
                 self.log.critical(str(ex))

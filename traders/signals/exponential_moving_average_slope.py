@@ -3,6 +3,20 @@ from traders.signals.signal import Signal
 import matplotlib.pyplot as plt
 
 MINIMUM_INTERVALS = 10
+EMA_SPAN = 8
+
+INTERVAL_SLOPES = [
+    # {
+    #     'intervals': 8,
+    #     'min_change_percent': 1
+    # },
+    # {
+    #     'intervals': 3,
+    #     'min_change_percent': 2.2
+    # }
+]
+
+
 
 class ExponentialMovingAverageSlope(Signal):
     def __init__(self, base_currency, log):
@@ -12,22 +26,33 @@ class ExponentialMovingAverageSlope(Signal):
 
 
     def get_action(self, df):
-        if df.shape[0] < 200:
+        if df.shape[0] < EMA_SPAN:
             return SignalAction.WAIT
 
         if not 'ema' in df.columns:
-            df['ema'] = df.close.ewm(span=8, adjust=False).mean()
+            df['ema'] = df.close.ewm(span=EMA_SPAN, adjust=False).mean()
         if not 'ema_diff' in df.columns:
             df['ema_diff'] = df.ema - df.ema.shift()
 
+        action = SignalAction.WAIT
+
+        for i_slope in INTERVAL_SLOPES:
+            percent_change = self.calculate_percent_change_over_intervals(i_slope['intervals'], df)
+            self.log.debug(f'Slope over last {i_slope["intervals"]} at {df.index.values[df.shape[0]-1]} intervals is {percent_change}')
+            if percent_change > i_slope['min_change_percent']:
+                self.log.debug(f'Slope over last {i_slope["intervals"]} intervals is {percent_change} which is greater than {i_slope["min_change_percent"]}')
+                return SignalAction.BUY
+            elif percent_change * -1 > i_slope['min_change_percent']:
+                self.log.debug(f'Slope over last {i_slope["intervals"]} intervals is {percent_change} which is less than {i_slope["min_change_percent"]}')
+                return SignalAction.SELL
+
+
         latest_interval = df.tail(MINIMUM_INTERVALS)
-        #self.log.debug(latest_interval)
 
         mas = []
         for i in range(0, MINIMUM_INTERVALS):
             mas.append(latest_interval.ema_diff.values[i])
 
-        action = SignalAction.WAIT
 
         if all(i > 0 for i in mas):
             self.log.debug(f'Last {MINIMUM_INTERVALS} intervals are increasing {mas}')
@@ -40,12 +65,17 @@ class ExponentialMovingAverageSlope(Signal):
         else:
             self.log.info(f'{self.base_currency} -')
 
-        if action != SignalAction.WAIT:
-            self._add_action(action, latest_interval.index.values[0], latest_interval.close.values[0])
-
-        self.render(df)
-
         return action
+
+
+    def calculate_percent_change_over_intervals(self, intervals, df):
+        # lastest_intervals = df.tail(intervals + 1)
+        # self.log.debug(lastest_intervals)
+
+        last_row = df.shape[0] - 1
+        start = df.close.values[last_row - intervals]
+        end = df.close.values[last_row]
+        return ((end - start)/start) * 100
 
 
     def render(self, df):

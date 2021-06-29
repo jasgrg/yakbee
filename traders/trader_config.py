@@ -5,6 +5,9 @@ from traders.signals.exponential_moving_average_crossover import ExponentialMovi
 from traders.signals.macd import MACD
 from traders.signals.moving_average_slope import MovingAverageSlope
 from traders.signals.exponential_moving_average_slope import ExponentialMovingAverageSlope
+from traders.signals.three_black_crows import ThreeBlackCrows
+from traders.signals.three_white_soldiers import ThreeWhiteSoldiers
+
 from traders.strategy import Strategy
 
 signal_defs = {
@@ -14,7 +17,9 @@ signal_defs = {
     'exponential_moving_average': ExponentialMovingAverage,
     'exponential_moving_average_crossover': ExponentialMovingAverageCrossover,
     'exponential_moving_average_slope': ExponentialMovingAverageSlope,
-    'macd': MACD
+    'macd': MACD,
+    'three_black_crows': ThreeBlackCrows,
+    'three_white_soldiers': ThreeWhiteSoldiers
 }
 
 
