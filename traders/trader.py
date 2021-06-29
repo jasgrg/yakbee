@@ -128,3 +128,4 @@ class Trader():
         plt.savefig(filename)
         self.log.critical(f'file:{filename}')
 
+

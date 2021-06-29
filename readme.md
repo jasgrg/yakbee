@@ -45,6 +45,7 @@ This file is not in source control so before running yakbee you'll need to creat
                     "quote_currency" : "USD",
                     "granularity" : 300,
                     "sell_at_loss": "false",
+                    "min_gain_to_sell": 0.2,
                     "buy_strategies": [["exponential_moving_average_slope"]],
                     "sell_strategies": [["exponential_moving_average_slope"]]
                 }
@@ -82,9 +83,11 @@ trade with live funds.
   - <code>granularity</code> most (*all* at the current time) trading signals will look at the base currency's price at
   at a specified granularity (1m, 5m, 15m, 1hr, etc) to determine trading actions. These intervals are usually graphically
   represented as [candlesticks](https://www.investopedia.com/trading/candlestick-charting-what-is-it/).
-  - <code>sellatloss</code> when <code>false</code> the bot will not execute a sell if the current value is less than the
+  - <code>sellatloss</code> *optional: defaults to true*, when <code>false</code> the bot will not execute a sell if the current value is less than the
   previous purchase value. This can be good or bad depending on your strategy. Sometimes a short term loss can result in a long
   term gain, but not always. Trade with care.
+  - <code>min_gain_to_sell</code> *optional: defaults to 0* when <code>sellatloss</code> is True this setting has no effect.
+  Otherwise the bot will not sell if the current price is less than the previous buy price plus the mimimum percentage gain.
   - <code>buy_strategies</code> is a two-dimensional array of strings. Each child array is a strategy. Each string within 
   the strategy represents a signal. During the trading cycle the bot will consult each strategy on whether it determines
   a buy action or a sell action. If *any* strategy returns a buy action then a buy will be executed. In order for a strategy
@@ -95,13 +98,14 @@ trade with live funds.
 
 #### How it works
 
-###### Trade manager
+##### Trade manager
+
 At the top level is the <code>trade_manager</code>. The trade manager holds a list of <code>traders</code>.
 Every 5 seconds the trademanager will loop through the list of traders and have them check 
 whether to trade or not and if so to execute the trade. Each trader only takes action if it has been *x* seconds
 since the last time it took action, where *x* is the granularity specified for the trader.
 
-###### Traders
+##### Traders
 
 When it is time for the trader to take action, it begins by looping through the <code>buy_strategies</code>.
 If any of the buy strategies returns a *buy* action then the traders buys as much of the base currency
@@ -113,16 +117,22 @@ currently being held. If <code>sell_at_loss</code> is 0 then the trader will che
 If the current price is less than the last purchase price the trader will not sell.
 
 
-###### Strategy
+##### Strategy
 
 A strategy is simply a list of signals. For the strategy to take action, all of the signals must agree on the action to 
 be taken.
 
-###### Signals
+##### Signals
 
 A <code>signal</code> is a piece of code that looks at the history of the base currency and casts a vote to the strategy
 whether to buy, sell or wait.
 
 #### Execution
 
+##### Yakbee bot
+
     % python3 yakbee.py
+    
+##### Script to chart historical orders
+
+    % python3 orders_charter.py
