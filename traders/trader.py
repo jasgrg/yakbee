@@ -75,7 +75,8 @@ class Trader():
                     self.render_strategies()
                 except Exception as ex:
                     # log and continue
-                    self.log.error(traceback.format_exc())
+                    #self.log.error(traceback.format_exc())
+                    self.log.warning(f'failed to render trades or strategies')
 
 
     def get_historical_data(self, current_time):
