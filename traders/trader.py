@@ -12,12 +12,12 @@ class Trader():
         self.last_calc_date = 0
         self.log = log
         self.notify_service = notify_service or NotificationService()
-
         self.config = TraderConfig(config, log)
         self.market = f'{self.config.base_currency}-{self.config.quote_currency}'
         self.exchange = self.get_exchange(config['exchange'])
         self.last_action = self.exchange.get_last_action()
         self.render_after_calc = True
+        self.log.debug(f'{self.config.name} created')
 
     def calculate_and_trade(self, current_time):
 

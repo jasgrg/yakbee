@@ -25,53 +25,61 @@ class CoinBaseProExchange():
         self.product = self._get_product()
 
 
-    def get_historic_data(self, granularity, start_date_time: datetime = None, end_date_time: datetime = None):
-
+    def get_historic_data(self, granularity, start_date_time: datetime = None, end_date_time: datetime = None, retry=0):
         if granularity not in [60, 300, 900, 3600, 21600, 86400]:
             raise Exception(f'Invalid granularity {granularity}')
 
-        if start_date_time is None or end_date_time is None:
-            self.log.debug(f'Getting history | {granularity}')
-            resp = requests.get(f'{self.base_url}/products/{self.market}/candles?granularity={granularity}')
-            data = resp.json()
-        else:
-            # back up start date the number of intervals needed to start calculating
-            start_date_time = start_date_time - timedelta(seconds=INTERVALS_PRIOR_TO_START * granularity)
-            delta = end_date_time - start_date_time
+        try:
 
-            # do we need multiple requests?
-            if delta.total_seconds() / granularity >= MAX_INTERVALS_PER_REQUEST:
-                data = []
-                cur_start_time = start_date_time
-                cur_end_time = start_date_time + timedelta(seconds=MAX_INTERVALS_PER_REQUEST*granularity)
-                while True:
-                    self.log.debug(f'Getting history {cur_start_time} - {cur_end_time} | {granularity}')
-                    resp = requests.get(
-                        f'{self.base_url}/products/{self.market}/candles?granularity={granularity}&start={cur_start_time.isoformat()}&end={cur_end_time.isoformat()}')
-                    data.extend(resp.json())
-                    if cur_end_time >= end_date_time:
-                        break
-                    cur_start_time = cur_start_time + timedelta(seconds=MAX_INTERVALS_PER_REQUEST*granularity)
-                    cur_end_time = cur_end_time + timedelta(seconds=MAX_INTERVALS_PER_REQUEST*granularity)
-                    if cur_end_time > end_date_time:
-                        cur_end_time = end_date_time
-
-
-            else:
-                self.log.debug(f'Getting history {start_date_time} - {end_date_time} | {granularity}')
-                resp = requests.get(f'{self.base_url}/products/{self.market}/candles?granularity={granularity}&start={start_date_time.isoformat()}&end={end_date_time.isoformat()}')
+            if start_date_time is None or end_date_time is None:
+                self.log.debug(f'Getting history | {granularity}')
+                resp = requests.get(f'{self.base_url}/products/{self.market}/candles?granularity={granularity}')
+                resp.raise_for_status()
                 data = resp.json()
+            else:
+                # back up start date the number of intervals needed to start calculating
+                start_date_time = start_date_time - timedelta(seconds=INTERVALS_PRIOR_TO_START * granularity)
+                delta = end_date_time - start_date_time
 
-        data.sort(key=lambda x: x[0])
+                # do we need multiple requests?
+                if delta.total_seconds() / granularity >= MAX_INTERVALS_PER_REQUEST:
+                    data = []
+                    cur_start_time = start_date_time
+                    cur_end_time = start_date_time + timedelta(seconds=MAX_INTERVALS_PER_REQUEST*granularity)
+                    while True:
+                        self.log.debug(f'Getting history {cur_start_time} - {cur_end_time} | {granularity}')
+                        resp = requests.get(
+                            f'{self.base_url}/products/{self.market}/candles?granularity={granularity}&start={cur_start_time.isoformat()}&end={cur_end_time.isoformat()}')
+                        resp.raise_for_status()
+                        data.extend(resp.json())
+                        if cur_end_time >= end_date_time:
+                            break
+                        cur_start_time = cur_start_time + timedelta(seconds=MAX_INTERVALS_PER_REQUEST*granularity)
+                        cur_end_time = cur_end_time + timedelta(seconds=MAX_INTERVALS_PER_REQUEST*granularity)
+                        if cur_end_time > end_date_time:
+                            cur_end_time = end_date_time
 
-        dataframe = pd.DataFrame(data, columns=['epoch', 'low', 'high', 'open', 'close', 'volume'])
-        #dataframe['date'] = dataframe.apply(lambda a: datetime.utcfromtimestamp(a["epoch"]), axis=1)
-        dataframe['date'] = dataframe.apply(lambda a: datetime.fromtimestamp(a["epoch"], tz=datetime_helpers.LOCAL_TIMEZONE), axis=1)
-        dataframe.set_index('date', inplace=True)
-        #self.log.debug(dataframe)
-        #dataframe.to_csv('datasets/six_months.csv')
 
-        return dataframe
+                else:
+                    self.log.debug(f'Getting history {start_date_time} - {end_date_time} | {granularity}')
+                    resp = requests.get(f'{self.base_url}/products/{self.market}/candles?granularity={granularity}&start={start_date_time.isoformat()}&end={end_date_time.isoformat()}')
+                    resp.raise_for_status()
+                    data = resp.json()
+
+            data.sort(key=lambda x: x[0])
+
+            dataframe = pd.DataFrame(data, columns=['epoch', 'low', 'high', 'open', 'close', 'volume'])
+            dataframe['date'] = dataframe.apply(lambda a: datetime.fromtimestamp(a["epoch"], tz=datetime_helpers.LOCAL_TIMEZONE), axis=1)
+            dataframe.set_index('date', inplace=True)
+            return dataframe
+
+        except Exception as ex:
+            if retry < 3:
+                self.log.debug(f'getting historic data failed, retry {retry}')
+                return self.get_historic_data(granularity, start_date_time, end_date_time, retry + 1)
+            else:
+                raise
+
 
     def _get_product(self):
         resp = requests.get(f'{self.base_url}/products/{self.market}')
@@ -125,12 +133,18 @@ class CoinBaseProExchange():
     def get_available_amount(self, currency) -> float:
         return float(self.get_account(currency)[0]["available"])
 
-    def get_account(self, currency):
+    def get_account(self, currency, retry=0):
+        self.log.debug('Getting account')
+
         resp = requests.get(f'{self.api_url}/accounts', auth=self)
         if resp.status_code == 200:
             accounts = resp.json()
             return [acc for acc in accounts if acc['currency'] == currency]
-        resp.raise_for_status()
+        elif retry < 3:
+            self.log.debug(f'Getting account failed {resp.status_code} retrying {retry}')
+            return self.get_account(currency, retry + 1)
+        else:
+            resp.raise_for_status()
 
 
     def market_buy(self, quote_quantity:float, close: float):
@@ -164,6 +178,8 @@ class CoinBaseProExchange():
         resp.raise_for_status()
 
     def get_filled_orders(self, retry=0):
+        self.log.debug('Getting filled orders')
+
         resp = requests.get(f'{self.api_url}/fills?product_id={self.market}', auth=self)
         if resp.status_code == 200:
             orders = resp.json()
@@ -177,6 +193,7 @@ class CoinBaseProExchange():
                 'action': SignalAction.BUY if o['side'] == 'buy' else SignalAction.SELL
             } for o in orders]
         elif retry < 2:
+            self.log.debug(f'Filled orders failed {resp.status_code} trying again {retry}')
             return self.get_filled_orders(retry + 1)
         else:
             resp.raise_for_status()
@@ -192,6 +209,7 @@ class CoinBaseProExchange():
         resp.raise_for_status()
 
     def get_last_action(self):
+        self.log.debug('Getting last action')
         orders = self.get_filled_orders()
         if len(orders) > 0:
             return orders[0]['action']
@@ -199,6 +217,7 @@ class CoinBaseProExchange():
 
 
     def get_last_buy_order(self):
+        self.log.debug('Getting last buy order')
         orders = self.get_filled_orders()
         orders = [o for o in orders if o['action'] == SignalAction.BUY]
         return orders[0] if len(orders) > 0 else None
