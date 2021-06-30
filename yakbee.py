@@ -17,7 +17,7 @@ def main():
         ns = NotificationService()
 
         if 'telegram' in config.config:
-            telegram = Telegram(config.config['telegram']['token'], config.config['telegram']['client_id'])
+            telegram = Telegram(config.config['telegram']['token'], config.config['telegram']['client_id'], poll=True)
             ns.add_handler(telegram.send)
 
         log.debug("Starting")

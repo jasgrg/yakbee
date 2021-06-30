@@ -54,12 +54,13 @@ class ExponentialMovingAverageSlope(Signal):
             mas.append(latest_interval.ema_diff.values[i])
 
         if all(i > 0 for i in mas):
-            self.log.debug(f'Last {MINIMUM_INTERVALS} intervals are increasing {mas}')
+            self.log.debug(f'{self.alias}: emas ^')
             action = SignalAction.BUY
         elif all(i < 0 for i in mas):
-            self.log.debug(f'Last {MINIMUM_INTERVALS} intervals are decreasing {mas}')
+            self.log.debug(f'{self.alias}: emas v')
             action = SignalAction.SELL
-
+        else:
+            self.log.debug(f'{self.alias}: emas -')
         return action
 
 

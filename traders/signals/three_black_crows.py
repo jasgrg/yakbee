@@ -23,7 +23,7 @@ class ThreeBlackCrows(Signal):
         action = SignalAction.WAIT
 
         if latest_interval.three_black_crows.values[0]:
-            self.log.debug(f'Three black crows found at {latest_interval.index.values[0]}')
+            self.log.debug(f'{self.alias}: Three black crows found at {latest_interval.index.values[0]}')
             action = SignalAction.SELL
 
         if action != SignalAction.WAIT:

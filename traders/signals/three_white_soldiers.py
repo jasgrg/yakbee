@@ -23,7 +23,7 @@ class ThreeWhiteSoldiers(Signal):
         action = SignalAction.WAIT
 
         if latest_interval.three_white_soldiers.values[0]:
-            self.log.debug(f'Three white soldiers found at {latest_interval.index.values[0]}')
+            self.log.debug(f'{self.alias}: Three white soldiers found at {latest_interval.index.values[0]}')
             action = SignalAction.BUY
 
         if action != SignalAction.WAIT:
