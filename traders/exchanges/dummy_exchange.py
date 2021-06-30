@@ -1,6 +1,6 @@
 import pandas as pd
 from datetime import datetime
-from traders.signals.signal_type import SignalAction
+from traders.signals.signal_action import SignalAction
 
 class DummyExchange():
     def __init__(self, base_exchange, config, log):
@@ -8,15 +8,11 @@ class DummyExchange():
         self.log = log
         self.config = config
         self.amounts = {
-            self.config.base_currency : 26,
-            self.config.quote_currency : 0
+            self.config.base_currency : self.base_exchange.get_available_amount(self.config.base_currency),
+            self.config.quote_currency : self.base_exchange.get_available_amount(self.config.quote_currency)
         }
-        self.last_order_a_buy = True
-        self.last_buy_order = {
-            'size': 26,
-            'price': 0.26,
-            'fee': .05
-        }
+        self.orders = []
+
 
     def get_historic_data(self, granularity, start_date: datetime = None, end_date: datetime = None):
         return self.base_exchange.get_historic_data(granularity, start_date, end_date)
@@ -36,11 +32,13 @@ class DummyExchange():
         self.log.debug(f'Dummy exchange: Buying {to_buy} {self.config.base_currency} for {quote_minus_fees}')
         self.amounts[self.config.base_currency] = self.amounts[self.config.base_currency] + to_buy
         self.amounts[self.config.quote_currency] = self.amounts[self.config.quote_currency] - quote_quantity
-        self.last_buy_order = {
+        self.orders.append({
             'size': to_buy,
             'price': close,
+            'action': SignalAction.BUY,
             'fee': quote_quantity * fee
-        }
+        })
+
 
     def market_sell(self, base_quantity: float, close: float):
         fee = .005
@@ -51,9 +49,25 @@ class DummyExchange():
         self.amounts[self.config.quote_currency] = self.amounts[self.config.quote_currency] + valus_after_fees
         self.amounts[self.config.base_currency] = self.amounts[self.config.base_currency] - base_quantity
 
+        self.orders.append({
+            'size': base_quantity,
+            'price': close,
+            'action': SignalAction.SELL,
+            'fee': value_sold * fee
+        })
+
 
     def get_last_action(self):
-        return SignalAction.BUY if self.last_order_a_buy else SignalAction.SELL
+        if len(self.orders) == 0:
+            return self.base_exchange.get_last_action()
+        else:
+            return self.orders[len(self.orders - 1)]['action']
 
     def get_last_buy_order(self):
-        return self.last_buy_order
+        if len(self.orders) == 0:
+            return self.base_exchange.get_last_buy_order()
+        else:
+            return self.orders[len(self.orders) - 1] if self.orders[len(self.orders) - 1]['action'] == SignalAction.BUY else None
+
+    def get_filled_orders(self):
+        return self.orders

@@ -1,4 +1,4 @@
-from traders.signals.signal_type import SignalAction
+from traders.signals.signal_action import SignalAction
 from traders.signals.signal import Signal
 import matplotlib.pyplot as plt
 
@@ -9,9 +9,10 @@ import matplotlib.pyplot as plt
 ###
 import pandas as pd
 class MACD(Signal):
-    def __init__(self, log):
+    def __init__(self, log, alias):
         super().__init__()
         self.log = log
+        self.alias = alias
 
     def get_action(self, df):
         if not 'ema12' in df.columns:
@@ -46,7 +47,7 @@ class MACD(Signal):
 
 
     def render(self, df):
-        filename = 'graphs/macd.png'
+        filename = f'graphs/{self.alias}_macd.png'
 
         self.log.debug(f'Exponential Moving Average Signal: Rendering chart {filename}')
         plt.close('all')

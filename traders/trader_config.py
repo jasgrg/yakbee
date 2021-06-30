@@ -31,16 +31,18 @@ class TraderConfig():
         self.granularity = config['config']['granularity']
         self.sell_at_loss = config['config'].get('sell_at_loss', 'True') == 'True'
         self.min_gain_to_sell = config['config'].get('min_gain_to_sell', 0)
+        self.alias = config.get('alias', self.base_currency)
         self.live = config['live']
         self.buy_strategies = self.get_strategies(config['config']['buy_strategies'], log)
         self.sell_strategies = self.get_strategies(config['config']['sell_strategies'], log)
         self.auth = config['auth']
+
 
     def get_strategies(self, strategies, log):
         strats = []
         for strategy in strategies:
             signals = []
             for sig in strategy:
-                signals.append(signal_defs[sig](self.base_currency, log))
+                signals.append(signal_defs[sig](log, self.alias))
             strats.append(Strategy(signals))
         return strats

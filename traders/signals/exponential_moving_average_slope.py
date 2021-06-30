@@ -1,4 +1,4 @@
-from traders.signals.signal_type import SignalAction
+from traders.signals.signal_action import SignalAction
 from traders.signals.signal import Signal
 import matplotlib.pyplot as plt
 
@@ -19,10 +19,10 @@ INTERVAL_SLOPES = [
 
 
 class ExponentialMovingAverageSlope(Signal):
-    def __init__(self, base_currency, log):
+    def __init__(self, log, alias):
         super().__init__()
         self.log = log
-        self.base_currency = base_currency
+        self.alias = alias
 
 
     def get_action(self, df):
@@ -53,17 +53,12 @@ class ExponentialMovingAverageSlope(Signal):
         for i in range(0, MINIMUM_INTERVALS):
             mas.append(latest_interval.ema_diff.values[i])
 
-
         if all(i > 0 for i in mas):
             self.log.debug(f'Last {MINIMUM_INTERVALS} intervals are increasing {mas}')
-            self.log.info(f'{self.base_currency} ^')
             action = SignalAction.BUY
         elif all(i < 0 for i in mas):
             self.log.debug(f'Last {MINIMUM_INTERVALS} intervals are decreasing {mas}')
             action = SignalAction.SELL
-            self.log.info(f'{self.base_currency} v')
-        else:
-            self.log.info(f'{self.base_currency} -')
 
         return action
 
@@ -79,7 +74,7 @@ class ExponentialMovingAverageSlope(Signal):
 
 
     def render(self, df):
-        filename = f'graphs/{self.base_currency}_exp_moving_average_slope.png'
+        filename = f'graphs/{self.alias}_exp_moving_average_slope.png'
 
         self.log.debug(f'Moving Average Slope Signal: Rendering chart {filename}')
         plt.close('all')

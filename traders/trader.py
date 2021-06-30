@@ -1,20 +1,23 @@
 from traders.trader_config import TraderConfig
 from traders.exchanges.coinbase_pro_exchange import CoinBaseProExchange
-from traders.signals.signal_type import SignalAction
+from traders.signals.signal_action import SignalAction
 from traders.exchanges.dummy_exchange import DummyExchange
+from notifications.notification_service import NotificationService
+from datetime import datetime
+from helpers import datetime_helpers
 import matplotlib.pyplot as plt
 
 class Trader():
-    def __init__(self, config, log):
+    def __init__(self, config, log, notify_service = None):
         self.last_calc_date = 0
-        self.trades_to_render = []
         self.log = log
+        self.notify_service = notify_service or NotificationService()
 
         self.config = TraderConfig(config, log)
         self.market = f'{self.config.base_currency}-{self.config.quote_currency}'
         self.exchange = self.get_exchange(config['exchange'])
         self.last_action = self.exchange.get_last_action()
-
+        self.render_after_calc = True
 
     def calculate_and_trade(self, current_time):
 
@@ -41,9 +44,7 @@ class Trader():
 
                         if self.trade(SignalAction.BUY, close):
                             self.log.debug('*** Trade was successful ***')
-                            self.log.critical(f'{self.config.name} bought at {historical_data.tail(1).close.values[0]}')
-                            self.trades_to_render.append({'action': action, 'time': historical_data.tail(1).index.values[0], 'close': historical_data.tail(1).close.values[0]})
-                            self.render(historical_data)
+                            self.notify_service.notify(f'{self.config.name} bought at {historical_data.tail(1).close.values[0]}')
                         break
 
                 for strategy in self.config.sell_strategies:
@@ -61,15 +62,12 @@ class Trader():
 
                             if self.trade(SignalAction.SELL, close):
                                 self.log.debug('*** Trade was successful ***')
-                                self.log.critical(f'{self.config.name} sold at {historical_data.tail(1).close.values[0]}')
-                                self.trades_to_render.append(
-                                    {'action': action, 'time': historical_data.tail(1).index.values[0],
-                                     'close': historical_data.tail(1).close.values[0]})
-                                self.render(historical_data)
+                                self.notify_service.notify(f'{self.config.name} sold at {historical_data.tail(1).close.values[0]}')
                             break
                         else:
                             self.log.debug(f'Cannot sell at a loss : current price {close} : purchased price {last_buy_order["price"]} : target {(float(last_buy_order["price"]) + ((self.config.min_gain_to_sell / 100) * float(last_buy_order["price"])))}')
-
+            if self.render_after_calc:
+                self.render_strategies()
 
     def get_historical_data(self, current_time):
         return self.exchange.get_historic_data(self.config.granularity)
@@ -114,18 +112,24 @@ class Trader():
             s.render()
 
 
-    def render(self, df):
-        filename = f'graphs/{self.config.base_currency}_trades.png'
+    def render(self):
+        historical_data = self.get_historical_data(self.last_calc_date)
+        orders = self.exchange.get_filled_orders()
+        min_date = datetime.fromtimestamp(historical_data.epoch.values[0], tz=datetime_helpers.LOCAL_TIMEZONE)
+
+        trades_to_render = [o for o in orders if o['date'] > min_date]
+
+        filename = f'graphs/{self.config.alias}_trades.png'
         plt.close('all')
         plt.xticks(rotation=45)
-        plt.plot(df.close, label='close')
+        plt.plot(historical_data.close, label='close')
 
         plt.legend()
         plt.ylabel('Close')
-        for action in self.trades_to_render:
-            plt.plot(action['time'], action['close'], 'g*' if action['action'] == SignalAction.BUY else 'r*', markersize=10, label='Buy' if action['action'] == SignalAction.BUY else 'Sell')
+        for action in trades_to_render:
+            plt.plot(action['date'], action['price'], 'g*' if action['action'] == SignalAction.BUY else 'r*', markersize=10, label='Buy' if action['action'] == SignalAction.BUY else 'Sell')
 
         plt.savefig(filename)
-        self.log.critical(f'file:{filename}')
+        self.notify_service.notify(f'file:{filename}')
 
 

@@ -1,14 +1,13 @@
-from traders.signals.signal_type import SignalAction
+from traders.signals.signal_action import SignalAction
 from traders.signals.signal import Signal
 from numpy import maximum
 import matplotlib.pyplot as plt
 
 class ThreeBlackCrows(Signal):
-    def __init__(self, base_currency, log):
+    def __init__(self, log, alias):
         super().__init__()
         self.log = log
-        self.base_currency = base_currency
-
+        self.alias = alias
 
     def get_action(self, df):
         if not 'three_black_crows' in df.columns:
@@ -35,7 +34,7 @@ class ThreeBlackCrows(Signal):
 
 
     def render(self, df):
-        filename = f'graphs/{self.base_currency}_three_black_crows.png'
+        filename = f'graphs/{self.alias}_three_black_crows.png'
 
         self.log.debug(f'Three black crows: Rendering chart {filename}')
         plt.close('all')

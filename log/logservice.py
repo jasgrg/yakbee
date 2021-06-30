@@ -1,5 +1,4 @@
 import logging
-from log.telegram import Telegram
 
 
 class Log():
@@ -25,10 +24,6 @@ class Log():
         handler.setFormatter(formatter)
         self.logger.addHandler(handler)
 
-        self.telegram = None
-        if 'telegram' in config.config:
-            self.telegram = Telegram(config.config['telegram']['token'], config.config['telegram']['client_id'])
-
 
     def debug(self, str):
         self.logger.debug(str)
@@ -41,8 +36,6 @@ class Log():
 
     def critical(self, str):
         self.logger.critical(str)
-        if self.telegram is not None:
-            self.telegram.send(str)
 
     def error(self, str):
         self.logger.error(str)

@@ -1,15 +1,14 @@
-from traders.signals.signal_type import SignalAction
+from traders.signals.signal_action import SignalAction
 from traders.signals.signal import Signal
 import matplotlib.pyplot as plt
 
 MINIMUM_INTERVALS = 10
 
 class MovingAverageSlope(Signal):
-    def __init__(self, base_currency, log):
+    def __init__(self, log, alias):
         super().__init__()
         self.log = log
-        self.base_currency = base_currency
-
+        self.alias = alias
 
     def get_action(self, df):
         if df.shape[0] < 200:
@@ -48,7 +47,7 @@ class MovingAverageSlope(Signal):
 
 
     def render(self, df):
-        filename = f'graphs/{self.base_currency}_moving_average_slope.png'
+        filename = f'graphs/{self.alias}_moving_average_slope.png'
 
         self.log.debug(f'Moving Average Slope Signal: Rendering chart {filename}')
         plt.close('all')

@@ -2,18 +2,20 @@ import time
 import sched
 from models.config import Config
 from traders.trader import Trader
+from notifications.notification_service import NotificationService
 import traceback
 
 class TradeManager():
-    def __init__(self, config: Config, log):
+    def __init__(self, config: Config, log, notification: NotificationService):
         self.log = log
+        self.notify_service = notification
         self.config = config
         self.scheduler = sched.scheduler(time.time, time.sleep)
 
 
     def run(self):
         self.traders = self.create_traders(self.config.config)
-        self.log.critical(f'Yakbee running with {len(self.traders)} traders')
+        self.notify_service.notify(f'Yakbee running with {len(self.traders)} traders')
         self.scheduler.enter(5, 1, self.main_loop, ())
         self.scheduler.run()
 
@@ -21,10 +23,9 @@ class TradeManager():
         for trader in self.traders:
             try:
                 trader.calculate_and_trade(time.time())
-                trader.render_strategies()
             except Exception as ex:
                 self.log.error(traceback.format_exc())
-                self.log.critical(str(ex))
+                self.notify_service.notify(str(ex))
         self.scheduler.enter(5, 1, self.main_loop, ())
 
 

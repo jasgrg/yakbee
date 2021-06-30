@@ -6,10 +6,11 @@ import hmac
 import hashlib
 import base64
 from numpy import floor
-from traders.signals.signal_type import SignalAction
+from traders.signals.signal_action import SignalAction
+from helpers import datetime_helpers
 MAX_INTERVALS_PER_REQUEST = 300
 INTERVALS_PRIOR_TO_START = 200
-LOCAL_TIMEZONE = datetime.now(timezone.utc).astimezone().tzinfo
+
 
 class CoinBaseProExchange():
     def __init__(self, market, config, log):
@@ -65,7 +66,7 @@ class CoinBaseProExchange():
 
         dataframe = pd.DataFrame(data, columns=['epoch', 'low', 'high', 'open', 'close', 'volume'])
         #dataframe['date'] = dataframe.apply(lambda a: datetime.utcfromtimestamp(a["epoch"]), axis=1)
-        dataframe['date'] = dataframe.apply(lambda a: datetime.fromtimestamp(a["epoch"], tz=LOCAL_TIMEZONE), axis=1)
+        dataframe['date'] = dataframe.apply(lambda a: datetime.fromtimestamp(a["epoch"], tz=datetime_helpers.LOCAL_TIMEZONE), axis=1)
         dataframe.set_index('date', inplace=True)
         #self.log.debug(dataframe)
         #dataframe.to_csv('datasets/six_months.csv')
@@ -162,14 +163,23 @@ class CoinBaseProExchange():
         resp = requests.post(f'{self.base_url}/orders', json=order, auth=self)
         resp.raise_for_status()
 
-    def get_filled_orders(self):
+    def get_filled_orders(self, retry=0):
         resp = requests.get(f'{self.api_url}/fills?product_id={self.market}', auth=self)
         if resp.status_code == 200:
             orders = resp.json()
             orders.sort(key=lambda o: o['created_at'])
             orders.reverse()
-            return orders
-        resp.raise_for_status()
+            return [{
+                'date': pd.to_datetime(o['created_at']),
+                'price': float(o['price']),
+                'size': float(o['size']),
+                'fee': float(o['fee']),
+                'action': SignalAction.BUY if o['side'] == 'buy' else SignalAction.SELL
+            } for o in orders]
+        elif retry < 2:
+            return self.get_filled_orders(retry + 1)
+        else:
+            resp.raise_for_status()
 
 
     def get_orders(self):
@@ -184,11 +194,11 @@ class CoinBaseProExchange():
     def get_last_action(self):
         orders = self.get_filled_orders()
         if len(orders) > 0:
-            return SignalAction.BUY if orders[0]['side'] == 'buy' else SignalAction.SELL
+            return orders[0]['action']
         return SignalAction.WAIT
 
 
     def get_last_buy_order(self):
         orders = self.get_filled_orders()
-        orders = [o for o in orders if o['side'] == 'buy']
+        orders = [o for o in orders if o['action'] == SignalAction.BUY]
         return orders[0] if len(orders) > 0 else None

@@ -1,12 +1,12 @@
-from traders.signals.signal_type import SignalAction
+from traders.signals.signal_action import SignalAction
 from traders.signals.signal import Signal
 import matplotlib.pyplot as plt
 
 class MovingAverageCrossover(Signal):
-    def __init__(self, log):
+    def __init__(self, log, alias):
         super().__init__()
         self.log = log
-
+        self.alias = alias
 
     def get_action(self, df):
         if df.shape[0] < 200:
@@ -52,7 +52,7 @@ class MovingAverageCrossover(Signal):
 
 
     def render(self, df):
-        filename = 'graphs/moving_average_crossover.png'
+        filename = f'graphs/{self.alias}_moving_average_crossover.png'
 
         self.log.debug(f'Moving Average Signal: Rendering chart {filename}')
         plt.close('all')

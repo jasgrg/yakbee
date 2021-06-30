@@ -1,10 +1,11 @@
-from traders.signals.signal_type import SignalAction
+from traders.signals.signal_action import SignalAction
 from traders.signals.signal import Signal
 import matplotlib.pyplot as plt
 
 class ExponentialMovingAverage(Signal):
-    def __init__(self, log):
+    def __init__(self, log, alias):
         super().__init__()
+        self.alias = alias
         self.log = log
 
 
@@ -49,7 +50,7 @@ class ExponentialMovingAverage(Signal):
 
 
     def render(self, df):
-        filename = 'graphs/exponential_moving_average.png'
+        filename = f'graphs/{self.alias}_exponential_moving_average.png'
 
         self.log.debug(f'Exponential Moving Average Signal: Rendering chart {filename}')
         plt.close('all')

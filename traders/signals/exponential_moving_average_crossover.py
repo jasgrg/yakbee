@@ -1,12 +1,12 @@
-from traders.signals.signal_type import SignalAction
+from traders.signals.signal_action import SignalAction
 from traders.signals.signal import Signal
 import matplotlib.pyplot as plt
 
 class ExponentialMovingAverageCrossover(Signal):
-    def __init__(self, log):
+    def __init__(self, log, alias):
         super().__init__()
         self.log = log
-
+        self.alias = alias
 
     def get_action(self, df):
         if df.shape[0] < 26:
@@ -60,12 +60,12 @@ class ExponentialMovingAverageCrossover(Signal):
 
         if action != SignalAction.WAIT:
             self._add_action(action, latest_interval.index.values[0], latest_interval.close.values[0])
-        #self.render(df)
+
         return action
 
 
     def render(self, df):
-        filename = 'graphs/exponential_moving_average_crossover.png'
+        filename = f'graphs/{self.alias}_exponential_moving_average_crossover.png'
 
         self.log.debug(f'Exponential Moving Average Signal: Rendering chart {filename}')
         plt.close('all')

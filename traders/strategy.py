@@ -1,4 +1,4 @@
-from traders.signals.signal_type import SignalAction
+from traders.signals.signal_action import SignalAction
 
 
 class Strategy():

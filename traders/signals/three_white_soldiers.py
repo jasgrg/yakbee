@@ -1,14 +1,13 @@
-from traders.signals.signal_type import SignalAction
+from traders.signals.signal_action import SignalAction
 from traders.signals.signal import Signal
 from numpy import maximum
 import matplotlib.pyplot as plt
 
 class ThreeWhiteSoldiers(Signal):
-    def __init__(self, base_currency, log):
+    def __init__(self, log, alias):
         super().__init__()
         self.log = log
-        self.base_currency = base_currency
-
+        self.alias = alias
 
     def get_action(self, df):
         if not 'three_white_soldiers' in df.columns:
@@ -34,7 +33,7 @@ class ThreeWhiteSoldiers(Signal):
 
 
     def render(self, df):
-        filename = f'graphs/{self.base_currency}_three_white_soldiers.png'
+        filename = f'graphs/{self.alias}_three_white_soldiers.png'
 
         self.log.debug(f'Three white soldiers: Rendering chart {filename}')
         plt.close('all')
