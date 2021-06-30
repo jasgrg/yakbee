@@ -44,7 +44,8 @@ class Trader():
 
                         if self.trade(SignalAction.BUY, close):
                             self.log.debug('*** Trade was successful ***')
-                            self.notify_service.notify(f'{self.config.name} bought at {historical_data.tail(1).close.values[0]}')
+                            if self.config.live:
+                                self.notify_service.notify(f'{self.config.name} bought at {historical_data.tail(1).close.values[0]}')
                         break
 
                 for strategy in self.config.sell_strategies:
@@ -62,7 +63,8 @@ class Trader():
 
                             if self.trade(SignalAction.SELL, close):
                                 self.log.debug('*** Trade was successful ***')
-                                self.notify_service.notify(f'{self.config.name} sold at {historical_data.tail(1).close.values[0]}')
+                                if self.config.live:
+                                    self.notify_service.notify(f'{self.config.name} sold at {historical_data.tail(1).close.values[0]}')
                             break
                         else:
                             self.log.debug(f'Cannot sell at a loss : current price {close} : purchased price {last_buy_order["price"]} : target {(float(last_buy_order["price"]) + ((self.config.min_gain_to_sell / 100) * float(last_buy_order["price"])))}')
