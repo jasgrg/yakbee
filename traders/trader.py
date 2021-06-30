@@ -71,7 +71,7 @@ class Trader():
                             self.log.debug(f'Cannot sell at a loss : current price {close} : purchased price {last_buy_order["price"]} : target {(float(last_buy_order["price"]) + ((self.config.min_gain_to_sell / 100) * float(last_buy_order["price"])))}')
             if self.render_after_calc:
                 try:
-                    self.render()
+                    self.render(historical_data)
                     self.render_strategies()
                 except Exception as ex:
                     # log and continue
@@ -121,8 +121,9 @@ class Trader():
             s.render()
 
 
-    def render(self):
-        historical_data = self.get_historical_data(self.last_calc_date)
+    def render(self, historical_data=None):
+        if historical_data is None:
+            historical_data = self.get_historical_data(self.last_calc_date)
         orders = self.exchange.get_filled_orders()
         min_date = datetime.fromtimestamp(historical_data.epoch.values[0], tz=datetime_helpers.LOCAL_TIMEZONE)
 

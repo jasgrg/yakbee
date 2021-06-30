@@ -19,8 +19,7 @@ def chart_orders():
             end_date = datetime.utcnow()
             start_date = end_date - timedelta(seconds=1600*t['config']['granularity'])
             trader = Trader(t, log)
-            data = trader.exchange.get_historic_data(trader.config.granularity, start_date, end_date)
-            trader.render(data)
+            trader.render()
 
     except Exception as ex:
         log.error(str(traceback.format_exc()))

@@ -1,7 +1,9 @@
 import requests
 import pandas as pd
 from datetime import datetime, timedelta, timezone
+from helpers import datetime_helpers
 import time
+import pytz
 import hmac
 import hashlib
 import base64
@@ -186,7 +188,7 @@ class CoinBaseProExchange():
             orders.sort(key=lambda o: o['created_at'])
             orders.reverse()
             return [{
-                'date': pd.to_datetime(o['created_at']),
+                'date':  datetime.strptime(o['created_at'][0:o['created_at'].index('.')], '%Y-%m-%dT%H:%M:%S'),
                 'price': float(o['price']),
                 'size': float(o['size']),
                 'fee': float(o['fee']),
