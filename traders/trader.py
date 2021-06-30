@@ -3,8 +3,8 @@ from traders.exchanges.coinbase_pro_exchange import CoinBaseProExchange
 from traders.signals.signal_action import SignalAction
 from traders.exchanges.dummy_exchange import DummyExchange
 from notifications.notification_service import NotificationService
-from datetime import datetime
-from helpers import datetime_helpers
+from datetime import datetime, timezone
+
 import matplotlib.pyplot as plt
 import traceback
 
@@ -125,7 +125,7 @@ class Trader():
         if historical_data is None:
             historical_data = self.get_historical_data(self.last_calc_date)
         orders = self.exchange.get_filled_orders()
-        min_date = datetime.fromtimestamp(historical_data.epoch.values[0]).astimezone()
+        min_date = datetime.fromtimestamp(historical_data.epoch.values[0]).astimezone(timezone.utc)
 
         trades_to_render = [o for o in orders if o['date'] > min_date]
 

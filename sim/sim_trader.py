@@ -1,7 +1,7 @@
 from traders.signals.signal_action import SignalAction
 from traders.trader import Trader
-from datetime import datetime
-from helpers import datetime_helpers
+from datetime import datetime, timezone
+
 
 class SimTrader(Trader):
     def __init__(self, config, log, start_time, end_time):
@@ -12,7 +12,7 @@ class SimTrader(Trader):
         self.current_time = None
 
     def get_historical_data(self, current_time):
-        self.current_time = datetime.fromtimestamp(current_time, tz=datetime_helpers.LOCAL_TIMEZONE)
+        self.current_time = datetime.fromtimestamp(current_time).astimezone(timezone.utc)
         return self.historical_data.loc[self.historical_data['epoch'] <= current_time].copy()
 
 
