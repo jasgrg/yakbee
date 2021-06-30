@@ -9,6 +9,7 @@ class Telegram():
         self.bot = telegram.Bot(token)
         self.client_id = str(client_id)
 
+
         if poll:
             updater = Updater(token)
             def upload_graph(update: telegram.Update, context: CallbackContext):
@@ -16,7 +17,7 @@ class Telegram():
                 for (dirpath, dirnames, filenames) in walk('graphs'):
                     for filename in filenames:
                         if str(filename).lower().startswith(curr):
-                            self.bot.send_photo(chat_id=self.client_id, photo=open(f'graphs/{filename}', 'rb'))
+                            self.bot.send_photo(chat_id=self.client_id, photo=open(f'graphs/{filename}', 'rb'), caption=filename)
             updater.dispatcher.add_handler(CommandHandler('g', upload_graph))
 
             def upload_traders(update: telegram.Update, context: CallbackContext):
@@ -24,7 +25,7 @@ class Telegram():
                 for (dirpath, dirnames, filenames) in walk('graphs'):
                     for filename in filenames:
                         if str(filename).lower().endswith('_trades.png'):
-                            self.bot.send_photo(chat_id=self.client_id, photo=open(f'graphs/{filename}', 'rb'))
+                            self.bot.send_photo(chat_id=self.client_id, photo=open(f'graphs/{filename}', 'rb'), caption=filename)
 
             updater.dispatcher.add_handler(CommandHandler('t', upload_traders))
 

@@ -6,6 +6,7 @@ from notifications.notification_service import NotificationService
 from datetime import datetime
 from helpers import datetime_helpers
 import matplotlib.pyplot as plt
+import traceback
 
 class Trader():
     def __init__(self, config, log, notify_service = None):
@@ -69,7 +70,13 @@ class Trader():
                         else:
                             self.log.debug(f'Cannot sell at a loss : current price {close} : purchased price {last_buy_order["price"]} : target {(float(last_buy_order["price"]) + ((self.config.min_gain_to_sell / 100) * float(last_buy_order["price"])))}')
             if self.render_after_calc:
-                self.render_strategies()
+                try:
+                    self.render()
+                    self.render_strategies()
+                except Exception as ex:
+                    # log and continue
+                    self.log.error(traceback.format_exc())
+
 
     def get_historical_data(self, current_time):
         return self.exchange.get_historic_data(self.config.granularity)
