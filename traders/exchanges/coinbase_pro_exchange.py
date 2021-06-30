@@ -187,8 +187,9 @@ class CoinBaseProExchange():
             orders = resp.json()
             orders.sort(key=lambda o: o['created_at'])
             orders.reverse()
+
             return [{
-                'date':  datetime.strptime(o['created_at'][0:o['created_at'].index('.')], '%Y-%m-%dT%H:%M:%S'),
+                'date':  datetime.strptime(o['created_at'][0:o['created_at'].index('.')], '%Y-%m-%dT%H:%M:%S').astimezone(),
                 'price': float(o['price']),
                 'size': float(o['size']),
                 'fee': float(o['fee']),
