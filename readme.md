@@ -9,6 +9,26 @@ as possible so that adding new signals and strategies did not require change to 
 - Python 3.7 - <https://installpython3.com>
 - Pip3 - <https://pip.pypa.io>
 
+## Other Requirements
+
+In order to run the bot you'll need an account on a crypto-currency exchange. Currently the only exchange
+supported by the bot is [CoinbasePro](https://pro.coinbase.com/). You can sign up for a an account for free. You should be able
+to run in simulation or test mode without depositing any money.
+
+The bot will trade with all available funds. CoinbasePro offers the ability to create portfolios. You can deposit individual
+amounts of money per portfolio and run the bot for a particular coin within that portfolio.
+
+For example, you might have multiple portfolios in coinbase:
+- BTC-USD with $100 to trade BTC
+- DOGE-USD with $10 to trade DOGE
+- XLM-USD with $10 to trade XLM
+- etc.
+
+Each api key you generate will be associated with a portfolio and can only access the funds
+in that portfolio. Therefore, each trader will have a separate api key/secret which is how the bot
+trades in a particular portfolio.
+
+
 ## Installation
     % git clone https://github.com/jasgrg/yakbee.git
     % cd yakbee
