@@ -72,6 +72,7 @@ The <code>traders</code> section is the only required section in the configurati
 list of markets you want the bot to trade in and the configuration associated with each market.
 
 - <code>name</code> Just for logging to specify what trader is emitting the log entries.
+- <code>alias</code> *optional*: used to identify trader for notifications.
 - <code>live</code> 0 means the bot will run in simulation mode and perform theoretical trades. 1 means the bot will 
 trade with live funds.
 - <code>exchange</code> specifies what online exchange to use. Current options are <code>coinbasepro</code> only.
