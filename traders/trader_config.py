@@ -29,7 +29,7 @@ class TraderConfig:
         self.base_currency = config['config']['base_currency']
         self.quote_currency = config['config']['quote_currency']
         self.granularity = config['config']['granularity']
-        self.sell_at_loss = config['config'].get('sell_at_loss', 'True') == 'True'
+        self.sell_at_loss = config['config'].get('sell_at_loss', 1) == 1
         self.min_gain_to_sell = config['config'].get('min_gain_to_sell', 0)
         self.alias = config.get('alias', self.base_currency)
         self.live = config['live']

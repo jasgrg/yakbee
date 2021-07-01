@@ -45,7 +45,7 @@ This file is not in source control so before running yakbee you'll need to creat
                     "base_currency" : "BTC",
                     "quote_currency" : "USD",
                     "granularity" : 300,
-                    "sell_at_loss": "false",
+                    "sell_at_loss": 0,
                     "min_gain_to_sell": 0.2,
                     "buy_strategies": [["exponential_moving_average_slope"]],
                     "sell_strategies": [["exponential_moving_average_slope"]]
@@ -85,9 +85,9 @@ trade with live funds.
   - <code>granularity</code> most (*all* at the current time) trading signals will look at the base currency's price at
   at a specified granularity (1m, 5m, 15m, 1hr, etc) to determine trading actions. These intervals are usually graphically
   represented as [candlesticks](https://www.investopedia.com/trading/candlestick-charting-what-is-it/).
-  - <code>sellatloss</code> *optional: defaults to true*, when <code>false</code> the bot will not execute a sell if the current value is less than the
+  - <code>sellatloss</code> *optional: defaults to 1*, when <code>0</code> the bot will not execute a sell if the current value is less than the
   previous purchase value. This can be good or bad depending on your strategy. Sometimes a short term loss can result in a long
-  term gain, but not always. Trade with care.
+  term gain, but not always. Trade with care. 
   - <code>min_gain_to_sell</code> *optional: defaults to 0* when <code>sellatloss</code> is True this setting has no effect.
   Otherwise the bot will not sell if the current price is less than the previous buy price plus the mimimum percentage gain.
   - <code>buy_strategies</code> is a two-dimensional array of strings. Each child array is a strategy. Each string within 
@@ -139,6 +139,24 @@ The simulation runs through the historical data for each trader from start date 
 
 This is a good way to validate different trading strategies over historical data.
 
+## Graphs
+
+After each trading interval the bot will render a set of graphs to the <code>graphs</code> directory.
+
+For each trader a graph will be rendered for each signal as well as a graph of the most recent trades. On 
+the trades graph a red star indicates where a sell trade was made and a green start indicates where a buy trade
+was made.
+
+## Examples
+
+Charting the exponential moving average which can be used as a buy/sell signal:
+
+![XLM ema](examples/XLM_ema_50.png)
+
+This graph shows the bot buying but not selling at a loss. The downside of this strategy is that sometimes
+a small loss could result in gains later.
+
+![XLM coin without reselling at a loss](examples/XLM_no_sell_at_loss.png)
 
 ## Execution
 
