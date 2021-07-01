@@ -32,6 +32,7 @@ This file is not in source control so before running yakbee you'll need to creat
         "traders": [
             {
                 "name": "BTC-USD on coinbase pro",
+                "alias": "BTC",
                 "live" : 0,
                 "exchange": "coinbasepro",
                 "auth": {
