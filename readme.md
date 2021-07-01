@@ -128,6 +128,17 @@ be taken.
 A <code>signal</code> is a piece of code that looks at the history of the base currency and casts a vote to the strategy
 whether to buy, sell or wait.
 
+
+#### Simulation Mode
+
+If a <code>sim</code> element is provided in the configuration and the <code>simulation</code> element is set to True 
+then the all of the traders will run in simulation mode.
+
+The simulation runs through the historical data for each trader from start date to end date and records all theoretical trades for the time period.
+
+This is a good way to validate different trading strategies over historical data.
+
+
 #### Execution
 
 ##### Yakbee bot
