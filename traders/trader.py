@@ -126,9 +126,9 @@ class Trader():
         if historical_data is None:
             historical_data = self.get_historical_data(self.last_calc_date)
         orders = self.exchange.get_filled_orders()
-        min_date = datetime.fromtimestamp(historical_data.epoch.values[0]).astimezone(timezone.utc)
+        min_date = historical_data.epoch.values[0]
 
-        trades_to_render = [o for o in orders if o['date'] > min_date]
+        trades_to_render = [o for o in orders if o['date'].timestamp() > min_date]
 
         filename = f'graphs/{self.config.alias}_trades.png'
         plt.close('all')
