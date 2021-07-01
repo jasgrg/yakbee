@@ -3,6 +3,7 @@ from traders.signals.signal import Signal
 from numpy import maximum
 import matplotlib.pyplot as plt
 
+
 class ThreeBlackCrows(Signal):
     def __init__(self, log, alias):
         super().__init__()
@@ -14,7 +15,7 @@ class ThreeBlackCrows(Signal):
             df['three_black_crows'] = ((df.open < df.open.shift(1)) & (df.open > df.close.shift(1))) \
                 & (df.close < df.low.shift(1)) \
                 & (df.low - maximum(df.open, df.close) < (abs(df.open - df.close))) \
-                &  ((df.open.shift(1) < df.open.shift(2)) & (df.open.shift(1) > df.close.shift(2))) \
+                & ((df.open.shift(1) < df.open.shift(2)) & (df.open.shift(1) > df.close.shift(2))) \
                 & (df.close.shift(1) < df.low.shift(2)) \
                 & (df.low.shift(1) - maximum(df.open.shift(1), df.close.shift(1)) < (abs(df.open.shift(1) - df.close.shift(1))))
 
@@ -30,8 +31,6 @@ class ThreeBlackCrows(Signal):
             self._add_action(action, latest_interval.index.values[0], latest_interval.close.values[0])
 
         return action
-
-
 
     def render(self, df):
         filename = f'graphs/{self.alias}_three_black_crows.png'

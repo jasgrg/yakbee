@@ -43,7 +43,6 @@ class ExponentialMovingAverageCrossover(Signal):
             df['ema12_lt_ema26_cross_over'] = df.ema12_lt_ema26.ne(df.ema12_lt_ema26.shift())
             df.loc[df['ema12_lt_ema26'] == False, 'ema12_lt_ema26_cross_over'] = False
 
-
         latest_interval = df.tail(1)
 
         self.log.debug(f'Exponential Moving Average Signal: ema12 {latest_interval.ema12.values[0]} | ema26 {latest_interval.ema26.values[0]}')
@@ -57,12 +56,10 @@ class ExponentialMovingAverageCrossover(Signal):
             self.log.debug(f'eam12 {latest_interval.ema12.values[0]} has crossed under ema26 {latest_interval.ema26.values[0]}')
             action = SignalAction.SELL
 
-
         if action != SignalAction.WAIT:
             self._add_action(action, latest_interval.index.values[0], latest_interval.close.values[0])
 
         return action
-
 
     def render(self, df):
         filename = f'graphs/{self.alias}_exponential_moving_average_crossover.png'

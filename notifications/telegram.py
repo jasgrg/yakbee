@@ -1,14 +1,13 @@
-
 import telegram
 from telegram.ext import Updater, CommandHandler, CallbackContext
 from os import walk
 import orders_charter
 
+
 class Telegram():
     def __init__(self, token='', client_id='', poll=False):
         self.bot = telegram.Bot(token)
         self.client_id = str(client_id)
-
 
         if poll:
             updater = Updater(token)
@@ -31,7 +30,6 @@ class Telegram():
 
             updater.start_polling()
 
-
     def send(self, message='') -> str:
         try:
             if message.startswith('file:'):
@@ -43,5 +41,3 @@ class Telegram():
         except Exception as err:
             print(err)
             return ''
-
-

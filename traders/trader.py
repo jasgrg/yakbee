@@ -3,12 +3,10 @@ from traders.exchanges.coinbase_pro_exchange import CoinBaseProExchange
 from traders.signals.signal_action import SignalAction
 from traders.exchanges.dummy_exchange import DummyExchange
 from notifications.notification_service import NotificationService
-from datetime import datetime, timezone
-
 import matplotlib.pyplot as plt
-import traceback
 
-class Trader():
+
+class Trader:
     def __init__(self, config, log, notify_service = None):
         self.last_calc_date = 0
         self.log = log
@@ -69,22 +67,19 @@ class Trader():
                             break
                         else:
                             self.log.debug(f'Cannot sell at a loss : current price {close} : purchased price {last_buy_order["price"]} : target {(float(last_buy_order["price"]) + ((self.config.min_gain_to_sell / 100) * float(last_buy_order["price"])))}')
+
             if self.render_after_calc:
                 try:
                     self.render(historical_data)
                     self.render_strategies()
                 except Exception as ex:
                     # log and continue
-                    #self.log.error(traceback.format_exc())
                     self.log.warning(f'failed to render trades or strategies')
-
 
     def get_historical_data(self, current_time):
         return self.exchange.get_historic_data(self.config.granularity)
 
-
     def trade(self, action:SignalAction, close: float):
-
         #TODO: set buy/sell limits, percentages, etc.
         base_currency_amount = self.exchange.get_available_amount(self.config.base_currency)
         quote_currency_amount = self.exchange.get_available_amount(self.config.quote_currency)
@@ -106,7 +101,6 @@ class Trader():
 
         return True
 
-
     def get_exchange(self, exchange):
         if exchange == 'coinbasepro':
             x = CoinBaseProExchange(self.market, self.config, self.log)
@@ -114,13 +108,11 @@ class Trader():
             x = DummyExchange(x, self.config, self.log)
         return x
 
-
     def render_strategies(self):
         for s in self.config.buy_strategies:
             s.render()
         for s in self.config.sell_strategies:
             s.render()
-
 
     def render(self, historical_data=None):
         if historical_data is None:
@@ -142,5 +134,3 @@ class Trader():
 
         plt.savefig(filename)
         self.notify_service.notify(f'file:{filename}')
-
-

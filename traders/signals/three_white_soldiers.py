@@ -3,6 +3,7 @@ from traders.signals.signal import Signal
 from numpy import maximum
 import matplotlib.pyplot as plt
 
+
 class ThreeWhiteSoldiers(Signal):
     def __init__(self, log, alias):
         super().__init__()
@@ -30,7 +31,6 @@ class ThreeWhiteSoldiers(Signal):
             self._add_action(action, latest_interval.index.values[0], latest_interval.close.values[0])
 
         return action
-
 
     def render(self, df):
         filename = f'graphs/{self.alias}_three_white_soldiers.png'

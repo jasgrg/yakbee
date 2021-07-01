@@ -23,7 +23,7 @@ signal_defs = {
 }
 
 
-class TraderConfig():
+class TraderConfig:
     def __init__(self, config, log):
         self.name = config['name']
         self.base_currency = config['config']['base_currency']
@@ -36,7 +36,6 @@ class TraderConfig():
         self.buy_strategies = self.get_strategies(config['config']['buy_strategies'], log)
         self.sell_strategies = self.get_strategies(config['config']['sell_strategies'], log)
         self.auth = config['auth']
-
 
     def get_strategies(self, strategies, log):
         strats = []

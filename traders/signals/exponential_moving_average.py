@@ -2,12 +2,12 @@ from traders.signals.signal_action import SignalAction
 from traders.signals.signal import Signal
 import matplotlib.pyplot as plt
 
+
 class ExponentialMovingAverage(Signal):
     def __init__(self, log, alias):
         super().__init__()
         self.alias = alias
         self.log = log
-
 
     def get_action(self, df):
         if df.shape[0] < 26:
@@ -32,7 +32,6 @@ class ExponentialMovingAverage(Signal):
         if not 'ema12_lt_ema26' in df.columns:
             df['ema12_lt_ema26'] = df.ema12 < df.ema26
 
-
         latest_interval = df.tail(1)
 
         action = SignalAction.WAIT
@@ -48,7 +47,6 @@ class ExponentialMovingAverage(Signal):
             self._add_action(action, latest_interval.index.values[0], latest_interval.close.values[0])
         return action
 
-
     def render(self, df):
         filename = f'graphs/{self.alias}_exponential_moving_average.png'
 
@@ -62,6 +60,7 @@ class ExponentialMovingAverage(Signal):
         plt.legend()
         plt.ylabel('Close')
         for action in self.action_list:
-            plt.plot(action['time'], action['close'], 'g*' if action['action'] == SignalAction.BUY else 'r*', markersize=10, label='Buy' if action['action'] == SignalAction.BUY else 'Sell')
+            plt.plot(action['time'], action['close'], 'g*' if action['action'] == SignalAction.BUY else 'r*',
+                     markersize=10, label='Buy' if action['action'] == SignalAction.BUY else 'Sell')
 
         plt.savefig(filename)

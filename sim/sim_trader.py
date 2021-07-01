@@ -15,7 +15,6 @@ class SimTrader(Trader):
         self.current_time = datetime.fromtimestamp(current_time).astimezone(timezone.utc)
         return self.historical_data.loc[self.historical_data['epoch'] <= current_time].copy()
 
-
     def trade(self, action: SignalAction, close: float):
         if super().trade(action, close):
             self.exchange.orders[-1]['date'] = self.current_time

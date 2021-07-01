@@ -1,7 +1,5 @@
 import pandas as pd
 import matplotlib.pyplot as plt
-
-
 from traders.signals.signal_action import SignalAction
 
 

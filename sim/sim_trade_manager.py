@@ -1,11 +1,10 @@
-import time
 from datetime import datetime, timedelta
-import sched
 from models.config import Config
 from sim.sim_trader import SimTrader
 from traders.trade_manager import TradeManager
 
 SIM_DATE_FORMAT = '%Y-%m-%d %H:%M:%S'
+
 
 class SimTradeManager(TradeManager):
     def __init__(self, config: Config, log):
@@ -14,6 +13,7 @@ class SimTradeManager(TradeManager):
         self.start_date = datetime.strptime(config.config['sim']['sim_start_date'], SIM_DATE_FORMAT)
         self.end_date = datetime.strptime(config.config['sim']['sim_end_date'], SIM_DATE_FORMAT)
         self.log = log
+        self.traders = []
 
     def run(self):
         self.traders = self.create_traders(self.config.config)
