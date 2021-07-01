@@ -1,15 +1,15 @@
 ## Yakbee 
 
-### About
+## About
 Yakbee is yet another crypto-currency trading bot. It can trade in an arbitrary number of markets with a unique
  configuration for each market. When I set out to build this bot my goal was to build it as modular 
 as possible so that adding new signals and strategies did not require change to the core code.
 
-#### Prerequisites
+## Prerequisites
 - Python 3.7 - <https://installpython3.com>
 - Pip3 - <https://pip.pypa.io>
 
-#### Installation
+## Installation
     % git clone https://github.com/jasgrg/yakbee.git
     % cd yakbee
     % pip3 install -r requirements.txt
@@ -21,7 +21,7 @@ If you want to run yakbee on a raspberry pi you might need to install the depend
     % sudo apt-get install python3-pandas python3-matplotlib
     % pip3 install requests python-telegram-bot
  
-#### Configuration
+## Configuration
 
 The configuration for yakbee is found in a <code>config.json</code> file in the root directory of the project. This file
 This file is not in source control so before running yakbee you'll need to create it.
@@ -66,7 +66,7 @@ This file is not in source control so before running yakbee you'll need to creat
         }
     }
 
-##### Configuration Breakdown
+#### Configuration Breakdown
 
 The <code>traders</code> section is the only required section in the configuration. <code>Traders</code> specifies a 
 list of markets you want the bot to trade in and the configuration associated with each market.
@@ -97,7 +97,7 @@ trade with live funds.
   sell strategy returns a sell action then a sell is executed. In order for a strategy to return a sell action, *all* of the 
   signals within the strategy must return a sell signal.
 
-#### How it works
+## How it works
 
 ##### Trade manager
 
@@ -129,7 +129,7 @@ A <code>signal</code> is a piece of code that looks at the history of the base c
 whether to buy, sell or wait.
 
 
-#### Simulation Mode
+## Simulation Mode
 
 If a <code>sim</code> element is provided in the configuration and the <code>simulation</code> element is set to True 
 then the all of the traders will run in simulation mode.
@@ -139,7 +139,7 @@ The simulation runs through the historical data for each trader from start date 
 This is a good way to validate different trading strategies over historical data.
 
 
-#### Execution
+## Execution
 
 ##### Yakbee bot
 
@@ -149,7 +149,7 @@ This is a good way to validate different trading strategies over historical data
 
     % python3 orders_charter.py
     
-#### Receive Notifications
+## Receive Notifications
 
 Currently the only notification service avialable in yakbee is to use telegram.
 
