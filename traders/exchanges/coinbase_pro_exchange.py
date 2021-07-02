@@ -23,6 +23,8 @@ class CoinBaseProExchange():
         self.log = log
         self.base_url = 'https://api.pro.coinbase.com'
         self.product = self._get_product()
+        self.filled_orders = None
+        self.last_filled_orders_fetch = None
 
     def get_historic_data(self, granularity, start_date_time: datetime = None, end_date_time: datetime = None, retry=0):
         if granularity not in [60, 300, 900, 3600, 21600, 86400]:
@@ -173,18 +175,27 @@ class CoinBaseProExchange():
     def get_filled_orders(self, retry=0):
         self.log.debug('Getting filled orders')
 
+        if self.filled_orders is not None:
+            seconds = datetime.now().timestamp() - self.last_filled_orders_fetch
+            if seconds < 30:
+                self.log.debug(f'Cache hit on filled orders')
+                return self.filled_orders
+
         resp = requests.get(f'{self.api_url}/fills?product_id={self.market}', auth=self)
         if resp.status_code == 200:
             orders = resp.json()
             orders.sort(key=lambda o: o['created_at'])
             orders.reverse()
-            return [{
+            self.filled_orders = [{
                 'date': pd.to_datetime(o['created_at']),
                 'price': float(o['price']),
                 'size': float(o['size']),
                 'fee': float(o['fee']),
                 'action': SignalAction.BUY if o['side'] == 'buy' else SignalAction.SELL
             } for o in orders]
+            self.last_filled_orders_fetch = datetime.now().timestamp()
+            return self.filled_orders
+
         elif retry < 2:
             self.log.debug(f'Filled orders failed {resp.status_code} trying again {retry}')
             return self.get_filled_orders(retry + 1)

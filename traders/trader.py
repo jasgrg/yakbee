@@ -42,7 +42,7 @@ class Trader:
                         self.last_action = SignalAction.BUY
 
                         if self.trade(SignalAction.BUY, close):
-                            self.log.debug('*** Trade was successful ***')
+                            self.log.debug('*** Buy was successful ***')
                             if self.config.live:
                                 self.notify_service.notify(f'{self.config.name} bought at {historical_data.tail(1).close.values[0]}')
                         break
@@ -61,7 +61,7 @@ class Trader:
                             self.last_action = SignalAction.SELL
 
                             if self.trade(SignalAction.SELL, close):
-                                self.log.debug('*** Trade was successful ***')
+                                self.log.debug('*** Sell was successful ***')
                                 if self.config.live:
                                     self.notify_service.notify(f'{self.config.name} sold at {historical_data.tail(1).close.values[0]}')
                             break
@@ -102,8 +102,7 @@ class Trader:
         return True
 
     def get_exchange(self, exchange):
-        if exchange == 'coinbasepro':
-            x = CoinBaseProExchange(self.market, self.config, self.log)
+        x = self._get_base_exchange(exchange)
         if not self.config.live:
             x = DummyExchange(x, self.config, self.log)
         return x
@@ -115,8 +114,11 @@ class Trader:
             s.render()
 
     def render(self, historical_data=None):
+
         if historical_data is None:
             historical_data = self.get_historical_data(self.last_calc_date)
+        if historical_data.shape[0] > 600:
+            return
         orders = self.exchange.get_filled_orders()
         min_date = historical_data.epoch.values[0]
 
@@ -134,3 +136,8 @@ class Trader:
 
         plt.savefig(filename)
         self.notify_service.notify(f'file:{filename}')
+
+    def _get_base_exchange(self, exchange):
+        if exchange == 'coinbasepro':
+            return CoinBaseProExchange(self.market, self.config, self.log)
+

@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from models.config import Config
 from sim.sim_trader import SimTrader
 from traders.trade_manager import TradeManager
@@ -10,8 +10,9 @@ class SimTradeManager(TradeManager):
     def __init__(self, config: Config, log):
         super().__init__(config, log, None)
 
-        self.start_date = datetime.strptime(config.config['sim']['sim_start_date'], SIM_DATE_FORMAT)
-        self.end_date = datetime.strptime(config.config['sim']['sim_end_date'], SIM_DATE_FORMAT)
+        self.start_date = datetime.strptime(config.config['sim']['sim_start_date'], SIM_DATE_FORMAT).astimezone(timezone.utc)
+        self.end_date = datetime.strptime(config.config['sim']['sim_end_date'], SIM_DATE_FORMAT).astimezone(timezone.utc)
+        self.data_file = config.config['sim'].get('datafile', None)
         self.log = log
         self.traders = []
 
@@ -27,15 +28,15 @@ class SimTradeManager(TradeManager):
 
         for trader in self.traders:
             for trade in trader.exchange.get_filled_orders():
-                self.log.debug(f"{trader.config.name} | {trade['date']} | {trade['action']} | {trade['size']} | {trade['price']} | {trade['size'] * trade['price']} ")
-            self.log.debug(f'{trader.config.name} | {trader.exchange.get_available_amount(trader.config.base_currency)} {trader.config.base_currency}')
-            self.log.debug(f'{trader.config.name} | {trader.exchange.get_available_amount(trader.config.quote_currency)} {trader.config.quote_currency}')
+                self.log.info(f"{trader.config.name} | {trade['date']} | {trade['action']} | {trade['size']} | {trade['price']} | {trade['size'] * trade['price']} ")
+            self.log.info(f'{trader.config.name} | {trader.exchange.get_available_amount(trader.config.base_currency)} {trader.config.base_currency}')
+            self.log.info(f'{trader.config.name} | {trader.exchange.get_available_amount(trader.config.quote_currency)} {trader.config.quote_currency}')
             trader.render_strategies()
             trader.render()
 
     def create_traders(self, config: Config) -> []:
         traders = []
         for t in config['traders']:
-            traders.append(SimTrader(t, self.log, self.start_date, self.end_date))
+            traders.append(SimTrader(t, self.log, self.start_date, self.end_date, self.data_file))
 
         return traders
