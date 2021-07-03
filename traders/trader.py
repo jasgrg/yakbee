@@ -128,6 +128,14 @@ class Trader:
         plt.close('all')
         plt.xticks(rotation=45)
         plt.plot(historical_data.close, label='close')
+        if len(orders) > 0 and len(trades_to_render) == 0 :
+            if orders[0]['action'] == SignalAction.BUY:
+                historical_data['last_buy'] = orders[0]['price']
+                plt.plot(historical_data.last_buy, label='last buy', color='g')
+            else:
+                historical_data['last_sell'] = orders[0]['price']
+                plt.plot(historical_data.last_sell, label='last sell', color='r')
+
 
         plt.legend()
         plt.ylabel('Close')
