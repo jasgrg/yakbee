@@ -150,6 +150,34 @@ A <code>signal</code> is a piece of code that looks at the history of the base c
 whether to buy, sell or wait.
 
 
+#### Technical Analysis
+
+[Technical Analysis](https://www.investopedia.com/terms/t/technicalanalysis.asp) is the act of "evaluating investments and identifying trade opportunities."
+
+To learn more about various signals employed in technical anaylsis see [here](https://www.investopedia.com/articles/technical/112601.asp).
+
+Yakbee currently supports the following list of signals. Each signal is not a very good trade indicator by itself but is 
+meant to be combined with other signals to form a strategy. This is what makes Yakbee so unique in that the signals can be
+arbitrarily combined in a way that best supports your trading style and goals.
+
+Available signals:
+
+- <code>moving_average</code> : Returns BUY/SELL if the short term simple moving average (sma) is above/under the long term sma.
+- <code>moving_average_crossover</code> : Returns BUY/SELL if the short term sma crossed 
+over/under the long term sma in the previous interval.
+- <code>moving_average_slope</code> : Returns BUY/SELL  if the [rate of change](https://www.investopedia.com/terms/p/pricerateofchange.asp) 
+of the short term sma is positive/negative.
+- <code>exponential_moving_average</code> : Returns BUY/SELL if the short term exponential moving average (ema) is above/under the long term ema.
+- <code>exponential_moving_average_crossover</code> : Returns BUY/SELL if the short term ema crossed 
+over/under the long term ema in the previous interval.
+- <code>exponential_moving_average_slope</code> : Returns BUY/SELL  if the [rate of change](https://www.investopedia.com/terms/p/pricerateofchange.asp) 
+of the short term ema is positive/negative.
+- <code>macd</code> : [Moving average convergence divergence](https://www.investopedia.com/terms/m/macd.asp)
+- <code>three_black_crows</code>: [description](https://www.investopedia.com/terms/t/three_black_crows.asp)
+- <code>three_white_solders</code>: [description](https://www.investopedia.com/terms/t/three_white_soldiers.asp)
+
+<strong>Don't see a signal here you want to use? Consider contributing or enter a feature request.</strong>
+
 ## Simulation Mode
 
 If a <code>sim</code> element is provided in the configuration and the <code>simulation</code> element is set to True 
