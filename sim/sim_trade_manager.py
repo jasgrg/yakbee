@@ -12,7 +12,7 @@ class SimTradeManager(TradeManager):
 
         self.start_date = datetime.strptime(config.config['sim']['sim_start_date'], SIM_DATE_FORMAT).astimezone(timezone.utc)
         self.end_date = datetime.strptime(config.config['sim']['sim_end_date'], SIM_DATE_FORMAT).astimezone(timezone.utc)
-        self.data_file = config.config['sim'].get('datafile', None)
+        self.data_file = config.config['sim'].get('data_file', None)
         self.log = log
         self.traders = []
 

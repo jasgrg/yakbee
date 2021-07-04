@@ -1,9 +1,11 @@
-## Yakbee 
+# Yakbee 
 
 ## About
 Yakbee is yet another crypto-currency trading bot. It can trade in an arbitrary number of markets with a unique
  configuration for each market. When I set out to build this bot my goal was to build it as modular 
 as possible so that adding new signals and strategies did not require change to the core code.
+
+If you find this project useful, have a question, or a suggestion on how to make it better [let me hear about it.](mailto:jason@jasongregory.us).
 
 ## Prerequisites
 - Python 3.7 - <https://installpython3.com>
@@ -76,7 +78,8 @@ This file is not in source control so before running yakbee you'll need to creat
         "sim": {
               "simulation": true,
               "sim_start_date": "2021-06-24 00:00:00",
-              "sim_end_date": "2021-06-27 00:00:00"
+              "sim_end_date": "2021-06-27 00:00:00",
+              "data_file": "datasets/btc_ytd_300.csv"
         },
         "telegram": {
             "token": "<removed>",
@@ -186,6 +189,15 @@ then the all of the traders will run in simulation mode.
 The simulation runs through the historical data for each trader from start date to end date and records all theoretical trades for the time period.
 
 This is a good way to validate different trading strategies over historical data.
+
+Settings available in the <code>sim</code> configuration element.
+
+- <code>simulation</code> sets simulation mode on/off
+- <code>start_date</code> start date of simulation
+- <code>end_date</code> end date of simulation
+- <code>data_file</code> *optional* csv data to be used instead of retrieving data from the exchange. This is helpful
+for running the simulation over a lot of data multiple times (to test different strategies). If this element is not 
+provided then the bot retrieves the historical data from the exchange.
 
 ## Graphs
 
