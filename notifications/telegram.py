@@ -1,7 +1,6 @@
 import telegram
 from telegram.ext import Updater, CommandHandler, CallbackContext
 from os import walk
-import orders_charter
 
 
 class Telegram():
@@ -20,7 +19,6 @@ class Telegram():
             updater.dispatcher.add_handler(CommandHandler('g', upload_graph))
 
             def upload_traders(update: telegram.Update, context: CallbackContext):
-                orders_charter.chart_orders()
                 for (dirpath, dirnames, filenames) in walk('graphs'):
                     for filename in filenames:
                         if str(filename).lower().endswith('_trades.png'):

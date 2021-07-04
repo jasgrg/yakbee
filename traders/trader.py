@@ -122,8 +122,7 @@ class Trader:
 
         if historical_data is None:
             historical_data = self.get_historical_data(self.last_calc_date)
-        if historical_data.shape[0] > 600:
-            return
+
         orders = self.exchange.get_filled_orders()
         min_date = historical_data.epoch.values[0]
 

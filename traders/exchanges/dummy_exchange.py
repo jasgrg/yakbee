@@ -7,13 +7,35 @@ class DummyExchange():
         self.base_exchange = base_exchange
         self.log = log
         self.config = config
-        self.amounts = {
-            self.config.base_currency: self.base_exchange.get_available_amount(self.config.base_currency),
-            self.config.quote_currency: self.base_exchange.get_available_amount(self.config.quote_currency)
-        }
+
+
         self.orders = self.base_exchange.get_filled_orders()
         if start_date is not None:
             self.orders = [o for o in self.orders if o['date'] < start_date]
+
+        if len(self.orders) > 0:
+            last_order = self.orders[0]
+            if last_order['action'] == SignalAction.BUY:
+                self.amounts = {
+                    self.config.base_currency: last_order['size'],
+                    self.config.quote_currency: 0
+                }
+            else:
+                self.amounts = {
+                    self.config.base_currency: 0,
+                    self.config.quote_currency: last_order['size'] * last_order['price']
+                }
+        else:
+            self.amounts = {
+                self.config.base_currency: self.base_exchange.get_available_amount(self.config.base_currency),
+                self.config.quote_currency: self.base_exchange.get_available_amount(self.config.quote_currency)
+            }
+
+        if self.amounts[self.config.quote_currency] == 0 and self.amounts[self.config.base_currency] == 0:
+            self.amounts[self.config.quote_currency] = 100
+
+
+        self.log.info(f'Starting simulation with {self.amounts[self.config.base_currency]} {self.config.base_currency} | {self.amounts[self.config.quote_currency]} {self.config.quote_currency}')
         self.data_file = data_file
 
     def get_historic_data(self, granularity, start_date: datetime = None, end_date: datetime = None):
@@ -22,9 +44,7 @@ class DummyExchange():
             df.set_index('date', inplace=True)
             return df
         else:
-            hd = self.base_exchange.get_historic_data(granularity, start_date, end_date)
-            #hd.to_csv(f'datasets/BTC_YTD_{granularity}.csv')
-            return hd
+            return self.base_exchange.get_historic_data(granularity, start_date, end_date)
 
     def get_ticker(self):
         return self.base_exchange.get_ticker()
