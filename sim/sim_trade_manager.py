@@ -26,11 +26,14 @@ class SimTradeManager(TradeManager):
                 cur_date_time = cur_date_time + timedelta(seconds=trader.config.granularity)
             cur_date_time = self.start_date
 
-        for trader in self.traders.reverse():
-            for trade in trader.exchange.get_filled_orders():
+        for trader in self.traders:
+            orders = [o for o in trader.exchange.get_filled_orders() if o['date'] > self.start_date]
+            orders.reverse()
+            for trade in orders:
                 self.log.info(f"{trader.config.name} | {trade['date']} | {trade['action']} | {trade['size']} | {trade['price']} | {trade['size'] * trade['price']} ")
-            self.log.info(f'{trader.config.name} | {trader.exchange.get_available_amount(trader.config.base_currency)} {trader.config.base_currency}')
-            self.log.info(f'{trader.config.name} | {trader.exchange.get_available_amount(trader.config.quote_currency)} {trader.config.quote_currency}')
+            base_amt = trader.exchange.get_available_amount(trader.config.base_currency)
+            quote_amt = trader.exchange.get_available_amount(trader.config.quote_currency)
+            self.log.info(f'{trader.config.name} finished with {base_amt} {trader.config.base_currency} | {quote_amt} {trader.config.quote_currency}')
             trader.render_strategies()
             trader.render()
 
