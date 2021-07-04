@@ -68,6 +68,7 @@ This file is not in source control so before running yakbee you'll need to creat
                     "quote_currency" : "USD",
                     "granularity" : 300,
                     "sell_at_loss": 0,
+                    "buy_near_high": 0,
                     "min_gain_to_sell": 0.2,
                     "buy_strategies": [["exponential_moving_average_slope"]],
                     "sell_strategies": [["exponential_moving_average_slope"]]
@@ -111,6 +112,8 @@ trade with live funds.
   - <code>sellatloss</code> *optional: defaults to 1*, when <code>0</code> the bot will not execute a sell if the current value is less than the
   previous purchase value. This can be good or bad depending on your strategy. Sometimes a short term loss can result in a long
   term gain, but not always. Trade with care. 
+  - <code>buy_near_high</code> *optional: defaults to 0* when 0 the bot will not perform a buy if the price is greater
+  than 97% of the recent max close price.
   - <code>min_gain_to_sell</code> *optional: defaults to 0* when <code>sellatloss</code> is True this setting has no effect.
   Otherwise the bot will not sell if the current price is less than the previous buy price plus the mimimum percentage gain.
   - <code>buy_strategies</code> is a two-dimensional array of strings. Each child array is a strategy. Each string within 

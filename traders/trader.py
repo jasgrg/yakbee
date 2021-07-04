@@ -37,15 +37,20 @@ class Trader:
                     action = strategy.get_action(historical_data, close)
 
                     if action == SignalAction.BUY and self.last_action != SignalAction.BUY:
+                        high_threshold = historical_data.close.max() * 0.97
 
-                        self.log.debug('*** Strategy returned BUY ***')
-                        self.last_action = SignalAction.BUY
+                        if self.config.buy_near_high or close < high_threshold:
 
-                        if self.trade(SignalAction.BUY, close):
-                            self.log.debug('*** Buy was successful ***')
-                            if self.config.live:
-                                self.notify_service.notify(f'{self.config.name} bought at {historical_data.tail(1).close.values[0]}')
-                        break
+                            self.log.debug('*** Strategy returned BUY ***')
+                            self.last_action = SignalAction.BUY
+
+                            if self.trade(SignalAction.BUY, close):
+                                self.log.debug('*** Buy was successful ***')
+                                if self.config.live:
+                                    self.notify_service.notify(f'{self.config.name} bought at {close}')
+                            break
+                        else:
+                            self.log.debug(f'Cannot buy near or above high : current price {close} : high threshold : {high_threshold}')
 
                 for strategy in self.config.sell_strategies:
 

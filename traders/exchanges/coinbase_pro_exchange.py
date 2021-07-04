@@ -38,6 +38,8 @@ class CoinBaseProExchange():
                 resp.raise_for_status()
                 data = resp.json()
             else:
+                start_date_time = start_date_time.replace(tzinfo=None)
+                end_date_time = end_date_time.replace(tzinfo=None)
                 # back up start date the number of intervals needed to start calculating
                 start_date_time = start_date_time - timedelta(seconds=INTERVALS_PRIOR_TO_START * granularity)
                 delta = end_date_time - start_date_time
