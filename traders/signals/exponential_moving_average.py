@@ -4,47 +4,65 @@ import matplotlib.pyplot as plt
 
 
 class ExponentialMovingAverage(Signal):
-    def __init__(self, log, alias):
+    def __init__(self, log, alias,  config=None):
         super().__init__()
-        self.alias = alias
         self.log = log
+        self.alias = alias
+        if config is not None:
+            self.short = config['short']
+            self.long = config['long']
+        else:
+            self.short = 12
+            self.long = 26
+
+        self.short_col = f'ema{self.short}'
+        self.long_col = f'ema{self.long}'
+
 
     def get_action(self, df):
-        if df.shape[0] < 26:
+        if df.shape[0] < self.long:
             return SignalAction.WAIT
 
-        if not 'ema8' in df.columns:
-            df['ema8'] = df.close.ewm(span=8, adjust=False).mean()
-        if not 'ema12' in df.columns:
-            df['ema12'] = df.close.ewm(span=12, adjust=False).mean()
-        if not 'ema26' in df.columns:
-            df['ema26'] = df.close.ewm(span=26, adjust=False).mean()
+        short_col = self.short_col
+        long_col = self.long_col
+        gt_col = f'{short_col}_gt_{long_col}'
+        lt_col = f'{short_col}_lt_{long_col}'
+        gt_co_col = f'{gt_col}_cross_over'
+        lt_co_col = f'{lt_col}_cross_over'
 
-        if not 'ema8_gt_ema12' in df.columns:
-            df['ema8_gt_ema12'] = df.ema8 > df.ema12
+        if not short_col in df.columns:
+            df[short_col] = df.close.ewm(span=self.short, adjust=False).mean()
+        if not long_col in df.columns:
+            df[long_col] = df.close.ewm(span=self.long, adjust=False).mean()
 
-        if not 'ema8_lt_ema12' in df.columns:
-            df['ema8_lt_ema12'] = df.ema8 < df.ema12
+        if not gt_col in df.columns:
+            df[gt_col] = df[short_col] > df[long_col]
+        if not gt_co_col in df.columns:
+            df[gt_co_col] = df[gt_col].ne(df[gt_col].shift())
+            df.loc[df[gt_col] == False, gt_co_col] = False
 
-        if not 'ema12_gt_ema26' in df.columns:
-            df['ema12_gt_ema26'] = df.ema12 > df.ema26
-
-        if not 'ema12_lt_ema26' in df.columns:
-            df['ema12_lt_ema26'] = df.ema12 < df.ema26
+        if not lt_col in df.columns:
+            df[lt_col] = df[short_col] < df[long_col]
+        if not lt_co_col in df.columns:
+            df[lt_co_col] = df[lt_col].ne(df[lt_col].shift())
+            df.loc[df[lt_col] == False, lt_co_col] = False
 
         latest_interval = df.tail(1)
 
+        self.log.debug(f'Exponential Moving Average Signal: {short_col} {latest_interval[short_col].values[0]} | {long_col} {latest_interval[long_col].values[0]}')
+
         action = SignalAction.WAIT
 
-        if latest_interval['ema12_gt_ema26'].values[0] == True:
-            self.log.debug(f'ema12 {latest_interval.ema12.values[0]} is over ema26 {latest_interval.ema26.values[0]}')
+        if latest_interval[gt_co_col].values[0] == True:
+            self.log.debug(f'{short_col} {latest_interval[short_col].values[0]} has crossed over {long_col} {latest_interval[long_col].values[0]}')
             action = SignalAction.BUY
-        elif latest_interval['ema12_lt_ema26'].values[0] == True:
-            self.log.debug(f'eam12 {latest_interval.ema12.values[0]} is under ema26 {latest_interval.ema26.values[0]}')
+        elif latest_interval[lt_co_col].values[0] == True:
+            self.log.debug(f'{short_col} {latest_interval[short_col].values[0]} has crossed under {long_col} {latest_interval[long_col].values[0]}')
             action = SignalAction.SELL
 
         if action != SignalAction.WAIT:
             self._add_action(action, latest_interval.index.values[0], latest_interval.close.values[0])
+
         return action
 
     def render(self, df):
@@ -54,13 +72,12 @@ class ExponentialMovingAverage(Signal):
         plt.close('all')
         plt.xticks(rotation=45)
         plt.plot(df.close, label='close')
-        plt.plot(df.ema8, label='ema8')
-        plt.plot(df.ema12, label='ema12')
-        plt.plot(df.ema26, label='ema26')
+        plt.plot(df[self.short_col], label=self.short_col)
+        plt.plot(df[self.long_col], label=self.long_col)
         plt.legend()
         plt.ylabel('Close')
-        for action in self.action_list:
-            plt.plot(action['time'], action['close'], 'g*' if action['action'] == SignalAction.BUY else 'r*',
-                     markersize=10, label='Buy' if action['action'] == SignalAction.BUY else 'Sell')
+        # for action in self.action_list:
+        #     plt.plot(action['time'], action['close'], 'g*' if action['action'] == SignalAction.BUY else 'r*',
+        #              markersize=10, label='Buy' if action['action'] == SignalAction.BUY else 'Sell')
 
         plt.savefig(filename)

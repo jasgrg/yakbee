@@ -70,8 +70,12 @@ This file is not in source control so before running yakbee you'll need to creat
                     "sell_at_loss": 0,
                     "buy_near_high": 0,
                     "min_gain_to_sell": 0.2,
-                    "buy_strategies": [["exponential_moving_average_slope"]],
-                    "sell_strategies": [["exponential_moving_average_slope"]]
+                    "buy_strategies": [
+                        ["exponential_moving_average", "moving_average_crossover"],
+                        ["exponential_moving_average_crossover", "moving_average"]],
+                    "sell_strategies": [
+                        ["exponential_moving_average", "moving_average_crossover"],
+                        ["exponential_moving_average_crossover", "moving_average"]]
                 }
             }
         ],

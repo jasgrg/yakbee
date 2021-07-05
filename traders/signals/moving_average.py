@@ -3,38 +3,51 @@ from traders.signals.signal import Signal
 import matplotlib.pyplot as plt
 
 class MovingAverage(Signal):
-    def __init__(self, log, alias):
+    def __init__(self, log, alias, config=None):
         super().__init__()
         self.log = log
         self.alias = alias
+        if config is not None:
+            self.short = config['short']
+            self.long = config['long']
+        else:
+            self.short = 50
+            self.long = 200
+
+        self.short_col = f'sma{self.short}'
+        self.long_col = f'sma{self.long}'
 
 
     def get_action(self, df):
-        if df.shape[0] < 200:
+        if df.shape[0] < self.long:
             return SignalAction.WAIT
 
-        if not 'sma50' in df.columns:
-            df['sma50'] = df.close.rolling(50, min_periods=1).mean()
-        if not 'sma200' in df.columns:
-            df['sma200'] = df.close.rolling(200, min_periods=1).mean()
+        short_col = self.short_col
+        long_col = self.long_col
+        gt_col = f'{short_col}_gt_{long_col}'
+        lt_col = f'{short_col}_lt_{long_col}'
 
-        if not 'sma50_gt_sma200' in df.columns:
-            df['sma50_gt_sma200'] = df.sma50 > df.sma200
+        if not short_col in df.columns:
+            df[short_col] = df.close.rolling(self.short, min_periods=1).mean()
+        if not long_col in df.columns:
+            df[long_col] = df.close.rolling(self.long, min_periods=1).mean()
 
-        if not 'sma50_lt_sma200' in df.columns:
-            df['sma50_lt_sma200'] = df.sma50 < df.sma200
+        if not gt_col in df.columns:
+            df[gt_col] = df[short_col] > df[long_col]
+        if not lt_col in df.columns:
+            df[lt_col] = df[short_col] < df[long_col]
 
         latest_interval = df.tail(1)
 
-        self.log.debug(f'Moving Average Signals: sma50 {latest_interval.sma50.values[0]} | sma200 {latest_interval.sma200.values[0]}')
+        self.log.debug(f'Moving Average Signals: short {latest_interval[short_col].values[0]} | long {latest_interval[long_col].values[0]}')
 
         action = SignalAction.WAIT
 
-        if latest_interval['sma50_gt_sma200'].values[0] == True:
-            self.log.debug(f'sma50 {latest_interval["sma50"].values[0]} has crossed over sma200 {latest_interval["sma200"].values[0]}')
+        if latest_interval[gt_col].values[0] == True:
+            self.log.debug(f'short {latest_interval[short_col].values[0]} has crossed over long {latest_interval[long_col].values[0]}')
             action = SignalAction.BUY
-        elif latest_interval['sma50_lt_sma200'].values[0] == True:
-            self.log.debug(f'sma50 {latest_interval["sma50"].values[0]} has crossed under sma200 {latest_interval["sma200"].values[0]}')
+        elif latest_interval[lt_col].values[0] == True:
+            self.log.debug(f'short {latest_interval[short_col].values[0]} has crossed under long {latest_interval[long_col].values[0]}')
             action = SignalAction.SELL
 
         if action != SignalAction.WAIT:
@@ -50,11 +63,11 @@ class MovingAverage(Signal):
         plt.close('all')
         plt.xticks(rotation=45)
         plt.plot(df.close, label='close')
-        plt.plot(df.sma50, label='sma50')
-        plt.plot(df.sma200, label='sma200')
+        plt.plot(df[self.short_col], label=self.short_col)
+        plt.plot(df[self.long_col], label=self.long_col)
         plt.legend()
         plt.ylabel('Close')
-        for action in self.action_list:
-            plt.plot(action['time'], action['close'], 'g*' if action['action'] == SignalAction.BUY else 'r*', markersize=10, label='Buy' if action['action'] == SignalAction.BUY else 'Sell')
+        # for action in self.action_list:
+        #     plt.plot(action['time'], action['close'], 'g*' if action['action'] == SignalAction.BUY else 'r*', markersize=10, label='Buy' if action['action'] == SignalAction.BUY else 'Sell')
 
         plt.savefig(filename)

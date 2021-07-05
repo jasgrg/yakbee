@@ -43,6 +43,11 @@ class TraderConfig:
         for strategy in strategies:
             signals = []
             for sig in strategy:
-                signals.append(signal_defs[sig](log, self.alias))
+                if isinstance(sig, str):
+                    signals.append(signal_defs[sig](log, self.alias))
+                else:
+                    signals.append(signal_defs[sig['signal']](log, self.alias, sig))
+
+
             strats.append(Strategy(signals))
         return strats
