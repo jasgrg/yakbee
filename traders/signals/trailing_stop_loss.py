@@ -45,7 +45,7 @@ class TrailingStopLoss(Signal):
             self.log.debug(f'Close {last_interval.close.values[0]} is less than the trailing stop loss threshold {threshold}')
             return SignalAction.SELL
 
-        self.log.info(f'Trailing stop loss: last price {self.last_order["price"]} | close {last_interval.close.values[0]} | threshold {threshold}')
+        self.log.info(f'Trailing stop loss: last price {self.last_order["price"]} | close {last_interval.close.values[0]} | max close {df_since_last_buy.close.max()} | threshold {threshold}')
 
         return SignalAction.WAIT
 
