@@ -21,7 +21,7 @@ class TrailingStopLoss(Signal):
     def get_action(self, df):
 
         if self.high is None:
-            if self.last_order['action'] == SignalAction.BUY:
+            if self.last_order is not None and self.last_order['action'] == SignalAction.BUY:
                 self.high = max(df.close.max(), float(self.last_order['price']))
             else:
                 return SignalAction.WAIT
