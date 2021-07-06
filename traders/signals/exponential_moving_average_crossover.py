@@ -53,7 +53,6 @@ class ExponentialMovingAverageCrossover(Signal):
             df[lt_co_col] = df[lt_col].ne(df[lt_col].shift())
         df.loc[df[lt_col] == False, lt_co_col] = False
 
-
         latest_interval = df.tail(1)
 
         self.log.debug(f'Exponential Moving Average Signal: {short_col} {latest_interval[short_col].values[0]} | {long_col} {latest_interval[long_col].values[0]}')

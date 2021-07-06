@@ -52,7 +52,7 @@ class MACD(Signal):
         self.log.debug(f'Exponential Moving Average Signal: Rendering chart {filename}')
         plt.close('all')
         plt.xticks(rotation=45)
-        plt.plot(df.close, label='close')
+        #plt.plot(df.close, label='close')
         plt.plot(df.macd, label='macd')
         plt.plot(df.macd_signal, label='signal')
         plt.legend()
