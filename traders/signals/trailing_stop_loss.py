@@ -25,7 +25,7 @@ class TrailingStopLoss(Signal):
         if self.last_order is None or self.last_order['action'] == SignalAction.SELL:
             return SignalAction.WAIT
 
-        df_since_last_buy = df.loc[df.index > self.last_order['date']]
+        df_since_last_buy = df.loc[df.epoch > self.last_order['date'].timestamp()]
 
         self.high = max(df_since_last_buy.close.max(), float(self.last_order['price']))
 
