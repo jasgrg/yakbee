@@ -85,6 +85,9 @@ class DummyExchange():
     def get_last_action(self):
         return self.orders[0]['action'] if len(self.orders) > 0 else SignalAction.WAIT
 
+    def get_last_order(self):
+        return None if len(self.orders) == 0 else self.orders[0]
+
     def get_last_buy_order(self):
         return self.orders[0] if len(self.orders) > 0 \
                                  and self.orders[0]['action'] == SignalAction.BUY \

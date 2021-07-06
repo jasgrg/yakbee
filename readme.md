@@ -74,9 +74,15 @@ This file is not in source control so before running yakbee you'll need to creat
                       ["exponential_moving_average_crossover", "macd", "golden_cross", "elder_ray"],
                       ["exponential_moving_average_crossover", "macd_crossover", "golden_cross", "elder_ray"]
                     ],
-                   "sell_strategies": [
-                      ["exponential_moving_average_crossover", "macd"]
-                   ]
+                    "sell_strategies": [
+                        ["exponential_moving_average_crossover", "macd"],
+                        [
+                            {
+                                "signal": "trailing_stop_loss",
+                                "percent": 2
+                            }
+                        ]
+                    ]
                 }
             }
         ],
@@ -158,8 +164,39 @@ be taken.
 ##### Signals
 
 A <code>signal</code> is a piece of code that looks at the history of the base currency and casts a vote to the strategy
-whether to buy, sell or wait.
+whether to buy, sell or wait. Each signal in the <code>buy_strategies</code> and </code>sell_strategies</code> can be identified
+by the name in which case the signal will use it's default configuration. Or you can provide signal specific values by
+supplying a dictionary in place of the signal name.
 
+For example:
+
+    {
+    ...
+    "buy_signals" : [
+        ["exponential_moving_average_crossover", "macd_crossover", "elder_ray"]
+      ]
+    }
+
+Can be further configured:
+
+    {
+    ...
+    "buy_signals": [
+       [
+          {
+             "signal": "exponential_moving_average_crossover",
+             "short": 12,
+             "long": 26
+          },
+          {
+              "signal": "macd_crossover",
+              "short": 12,
+              "long": 26,
+              "span": 9
+          },
+          "elder_ray"
+       ]
+    ]
 
 #### Technical Analysis
 
@@ -173,19 +210,36 @@ arbitrarily combined in a way that best supports your trading style and goals.
 
 Available signals:
 
-- <code>moving_average</code> : Returns BUY/SELL if the short term simple moving average (sma) is above/under the long term sma.
-- <code>moving_average_crossover</code> : Returns BUY/SELL if the short term sma crossed 
-over/under the long term sma in the previous interval.
-- <code>moving_average_slope</code> : Returns BUY/SELL  if the [rate of change](https://www.investopedia.com/terms/p/pricerateofchange.asp) 
-of the short term sma is positive/negative.
+- <code>elder_ray</code>: [description](https://www.investopedia.com/terms/e/elderray.asp)
+    - <code>span</code> *optional default: 13*
 - <code>exponential_moving_average</code> : Returns BUY/SELL if the short term exponential moving average (ema) is above/under the long term ema.
+    - <code>long</code> *optional default: 26*
+    - <code>short</code> *optional default: 12*
 - <code>exponential_moving_average_crossover</code> : Returns BUY/SELL if the short term ema crossed 
 over/under the long term ema in the previous interval.
-- <code>exponential_moving_average_slope</code> : Returns BUY/SELL  if the [rate of change](https://www.investopedia.com/terms/p/pricerateofchange.asp) 
-of the short term ema is positive/negative.
+    - <code>long</code> *optional default: 26*
+    - <code>short</code> *optional default: 12*
+- <code>golden_cross</code> : Alias for <code>moving_average</code>
 - <code>macd</code> : [Moving average convergence divergence](https://www.investopedia.com/terms/m/macd.asp)
+    - <code>long</code> *optional default: 26*
+    - <code>short</code> *optional default: 12*
+    - <code>span</code> *optional default: 9*
+- <code>macd_crossover</code>
+    - <code>long</code> *optional default: 26*
+    - <code>short</code> *optional default: 12*
+    - <code>span</code> *optional default: 9*
+- <code>moving_average</code> : Returns BUY/SELL if the short term simple moving average (sma) is above/under the long term sma.
+    - <code>long</code> *optional default: 200*
+    - <code>short</code> *optional default: 50*
+- <code>moving_average_crossover</code> : Returns BUY/SELL if the short term sma crossed 
+over/under the long term sma in the previous interval.
+    - <code>long</code> *optional default: 200*
+    - <code>short</code> *optional default: 50*
 - <code>three_black_crows</code>: [description](https://www.investopedia.com/terms/t/three_black_crows.asp)
 - <code>three_white_solders</code>: [description](https://www.investopedia.com/terms/t/three_white_soldiers.asp)
+- <code>trailing_stop_loss</code>: Returns SELL if the price falls percent/amount below the recent max price. 
+    - <code>percent</code> *optional, defaults to 1*
+    - <code>amount</code> *optional*
 
 <strong>Don't see a signal here you want to use? Consider contributing or enter a feature request.</strong>
 

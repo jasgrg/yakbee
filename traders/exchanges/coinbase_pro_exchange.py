@@ -220,6 +220,13 @@ class CoinBaseProExchange():
             return orders[0]['action']
         return SignalAction.WAIT
 
+    def get_last_order(self):
+        self.log.debug('Getting last order')
+        orders = self.get_filled_orders()
+        if len(orders) > 0:
+            return orders[0]
+        return None
+
     def get_last_buy_order(self):
         self.log.debug('Getting last buy order')
         orders = self.get_filled_orders()

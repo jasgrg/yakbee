@@ -29,12 +29,14 @@ class Trader:
 
             historical_data = self.get_historical_data(current_time)
 
+            last_order = self.exchange.get_last_order()
+
             if historical_data.shape[0] > 1:
                 close = historical_data.tail(1).close.values[0]
 
                 for strategy in self.config.buy_strategies:
 
-                    action = strategy.get_action(historical_data, close)
+                    action = strategy.get_action(historical_data, last_order)
 
                     if action == SignalAction.BUY and self.last_action != SignalAction.BUY:
                         high_threshold = historical_data.close.max() * 0.97
@@ -54,7 +56,7 @@ class Trader:
 
                 for strategy in self.config.sell_strategies:
 
-                    action = strategy.get_action(historical_data, close)
+                    action = strategy.get_action(historical_data, last_order)
 
                     if action == SignalAction.SELL and self.last_action != SignalAction.SELL:
 

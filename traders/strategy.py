@@ -6,7 +6,7 @@ class Strategy():
         self.signals = signals
         self.historical_data = None
 
-    def get_action(self, historical_data, close):
+    def get_action(self, historical_data, last_order):
         self.historical_data = historical_data
 
         action = SignalAction.WAIT
@@ -14,6 +14,7 @@ class Strategy():
         votes = []
 
         for s in self.signals:
+            s.set_last_order(last_order)
             votes.append(s.get_action(historical_data))
 
         # all signals must agree to initiate a trade

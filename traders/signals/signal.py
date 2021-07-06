@@ -14,6 +14,7 @@ class Signal():
         plt.style.use('seaborn')
 
         self.action_list = []
+        self.last_order = None
 
     def _add_action(self, action: SignalAction, time, close):
         self.action_list.append({
@@ -21,3 +22,6 @@ class Signal():
             'time': time,
             'close': close
         })
+
+    def set_last_order(self, last_order):
+        self.last_order = last_order

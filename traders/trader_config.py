@@ -9,7 +9,7 @@ from traders.signals.three_black_crows import ThreeBlackCrows
 from traders.signals.three_white_soldiers import ThreeWhiteSoldiers
 from traders.signals.macd_crossover import MACDCrossover
 from traders.signals.elder_ray import ElderRay
-
+from traders.signals.trailing_stop_loss import TrailingStopLoss
 
 from traders.strategy import Strategy
 
@@ -25,7 +25,9 @@ signal_defs = {
     'three_white_soldiers': ThreeWhiteSoldiers,
     'macd_crossover': MACDCrossover,
     'golden_cross': MovingAverage,
-    'elder_ray': ElderRay
+    'elder_ray': ElderRay,
+    'trailing_stop_loss': TrailingStopLoss
+
 }
 
 
