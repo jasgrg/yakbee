@@ -16,16 +16,18 @@ class TrailingStopLoss(Signal):
         else:
             self.percent = 1
 
-        self.high = None
 
     def get_action(self, df):
 
-        if self.high is None:
-            if self.last_order is not None and self.last_order['action'] == SignalAction.BUY:
-                self.high = max(df.close.max(), float(self.last_order['price']))
-            else:
-                return SignalAction.WAIT
+        if not 'trailing_stop_loss' in df.columns:
+            df['trailing_stop_loss'] = None
 
+        if self.last_order is None or self.last_order['action'] == SignalAction.SELL:
+            return SignalAction.WAIT
+
+        df_since_last_buy = df.loc[df.index > self.last_order['date']]
+
+        self.high = max(df_since_last_buy.close.max(), float(self.last_order['price']))
 
         last_interval = df.tail(1)
 
@@ -37,7 +39,7 @@ class TrailingStopLoss(Signal):
         else:
             threshold = self.high - self.amount
 
-        df.loc[df.index, 'trailing_stop_loss'] = threshold
+        df['trailing_stop_loss'] = threshold
 
         if last_interval.close.values[0] < threshold:
             return SignalAction.SELL
