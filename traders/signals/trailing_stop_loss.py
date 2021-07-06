@@ -42,7 +42,10 @@ class TrailingStopLoss(Signal):
         df['trailing_stop_loss'] = threshold
 
         if last_interval.close.values[0] < threshold:
+            self.log.debug(f'Close {last_interval.close.values[0]} is less than the trailing stop loss threshold {threshold}')
             return SignalAction.SELL
+
+        self.log.debug(f'Trailing stop loss: close {last_interval.close.values[0]} | threshold {threshold}')
 
         return SignalAction.WAIT
 
