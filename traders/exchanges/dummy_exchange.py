@@ -63,7 +63,8 @@ class DummyExchange():
             'size': to_buy,
             'price': close,
             'action': SignalAction.BUY,
-            'fee': quote_quantity * fee
+            'fee': quote_quantity * fee,
+            'date': datetime.utcnow()
         })
 
     def market_sell(self, base_quantity: float, close: float):
@@ -80,7 +81,7 @@ class DummyExchange():
             'price': close,
             'action': SignalAction.SELL,
             'fee': value_sold * fee,
-            'date': datetime.utcnow().astimezone(timezone.utc)
+            'date': datetime.utcnow()
         })
 
     def get_last_action(self):
