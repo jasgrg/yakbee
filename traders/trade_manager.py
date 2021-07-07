@@ -32,6 +32,6 @@ class TradeManager():
     def create_traders(self, config: Config) -> []:
         traders = []
         for t in config['traders']:
-            traders.append(Trader(t, self.log))
+            traders.append(Trader(t, self.log, self.notify_service))
 
         return traders

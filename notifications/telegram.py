@@ -41,7 +41,7 @@ class Telegram():
     def send(self, message='') -> str:
         try:
             if isinstance(message, dict):
-                self.amounts[dict['alias']] = message
+                self.amounts[message['alias']] = message
             elif message.startswith('file:'):
                 file = message.replace('file:', '')
                 self.bot.send_photo(chat_id=self.client_id, photo=open(file, 'rb'))
