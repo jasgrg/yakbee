@@ -153,7 +153,6 @@ class Trader:
             plt.plot(action['date'], action['price'], 'g*' if action['action'] == SignalAction.BUY else 'r*', markersize=10, label='Buy' if action['action'] == SignalAction.BUY else 'Sell')
 
         plt.savefig(filename)
-        self.notify_service.notify(f'file:{filename}')
 
     def _get_base_exchange(self, exchange):
         if exchange == 'coinbasepro':
