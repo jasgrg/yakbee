@@ -34,7 +34,7 @@ class Telegram():
                                     f'{self.amounts[key]["quote_amount"]} ' +
                                     f'{self.amounts[key]["quote_currency"]} | ' +
                                     f'{self.amounts[key]["total"]}')
-            updater.dispatcher.add_handler(CommandHandler('a', upload_traders))
+            updater.dispatcher.add_handler(CommandHandler('a', post_amounts))
 
             updater.start_polling()
 
