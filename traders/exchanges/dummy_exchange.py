@@ -79,7 +79,8 @@ class DummyExchange():
             'size': base_quantity,
             'price': close,
             'action': SignalAction.SELL,
-            'fee': value_sold * fee
+            'fee': value_sold * fee,
+            'date': datetime.utcnow().astimezone(timezone.utc)
         })
 
     def get_last_action(self):
