@@ -7,6 +7,7 @@ class Telegram():
     def __init__(self, token='', client_id='', poll=False):
         self.bot = telegram.Bot(token)
         self.client_id = str(client_id)
+        self.amounts = {}
 
         if poll:
             updater = Updater(token)
@@ -26,11 +27,22 @@ class Telegram():
 
             updater.dispatcher.add_handler(CommandHandler('t', upload_traders))
 
+            def post_amounts(update: telegram.Update, context: CallbackContext):
+                for key in self.amounts:
+                    self.send(f'{key} : {self.amounts[key]["base_amount"]} ' +
+                                    f'{self.amounts[key]["base_currency"]} | ' +
+                                    f'{self.amounts[key]["quote_amount"]} ' +
+                                    f'{self.amounts[key]["quote_currency"]} | ' +
+                                    f'{self.amounts[key]["total"]}')
+            updater.dispatcher.add_handler(CommandHandler('a', upload_traders))
+
             updater.start_polling()
 
     def send(self, message='') -> str:
         try:
-            if message.startswith('file:'):
+            if isinstance(message, dict):
+                self.amounts[dict['alias']] = message
+            elif message.startswith('file:'):
                 file = message.replace('file:', '')
                 self.bot.send_photo(chat_id=self.client_id, photo=open(file, 'rb'))
             else:

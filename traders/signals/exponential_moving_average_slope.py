@@ -11,11 +11,9 @@ class ExponentialMovingAverageSlope(Signal):
         if config is not None:
             self.intervals = config['intervals']
             self.span = config['span']
-            self.rate_of_change = config['rate_of_change']
         else:
             self.intervals = 10
             self.span = 8
-            self.rate_of_change = 0.5
 
     def get_action(self, df):
         if df.shape[0] < self.span:

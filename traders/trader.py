@@ -81,7 +81,11 @@ class Trader:
                     self.render_strategies()
                 except Exception as ex:
                     # log and continue
+                    self.log.debug(str(ex))
                     self.log.warning(f'failed to render trades or strategies')
+
+            self.notify_amounts(close)
+
 
     def get_historical_data(self, current_time):
         return self.exchange.get_historic_data(self.config.granularity)
@@ -154,4 +158,17 @@ class Trader:
     def _get_base_exchange(self, exchange):
         if exchange == 'coinbasepro':
             return CoinBaseProExchange(self.market, self.config, self.log)
+
+    def notify_amounts(self, close):
+        base_amount = self.exchange.get_available_amount(self.config.base_currency)
+        quote_amount = self.exchange.get_available_amount(self.config.quote_currency)
+
+        self.notify_service.notify({
+            "alias": self.config.alias,
+            "base_amount": base_amount,
+            "base_currency": self.config.base_currency,
+            "quote_amount": quote_amount,
+            "quote_currency": self.config.quote_currency,
+            "total": (base_amount * close) + quote_amount
+        })
 
