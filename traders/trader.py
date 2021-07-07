@@ -4,7 +4,7 @@ from traders.signals.signal_action import SignalAction
 from traders.exchanges.dummy_exchange import DummyExchange
 from notifications.notification_service import NotificationService
 import matplotlib.pyplot as plt
-
+from datetime import datetime
 
 class Trader:
     def __init__(self, config, log, notify_service = None):
@@ -24,7 +24,7 @@ class Trader:
 
         if time_since_last_calc >= self.config.granularity:
 
-            self.log.debug(f'{self.config.name} running calculations')
+            self.log.info(f'{self.config.name} running calculations {datetime.fromtimestamp(current_time).strftime("%Y-%m-%d %H:%M:%S")}')
             self.last_calc_date = current_time
 
             historical_data = self.get_historical_data(current_time)
@@ -75,16 +75,16 @@ class Trader:
                         else:
                             self.log.debug(f'Cannot sell at a loss : current price {close} : purchased price {last_buy_order["price"]} : target {(float(last_buy_order["price"]) + ((self.config.min_gain_to_sell / 100) * float(last_buy_order["price"])))}')
 
-            if self.render_after_calc:
-                try:
-                    self.render(historical_data)
-                    self.render_strategies()
-                except Exception as ex:
-                    # log and continue
-                    self.log.debug(str(ex))
-                    self.log.warning(f'failed to render trades or strategies')
+                if self.render_after_calc:
+                    try:
+                        self.render(historical_data)
+                        self.render_strategies()
+                    except Exception as ex:
+                        # log and continue
+                        self.log.debug(str(ex))
+                        self.log.warning(f'failed to render trades or strategies')
 
-            self.notify_amounts(close)
+                self.notify_amounts(close)
 
 
     def get_historical_data(self, current_time):
@@ -123,6 +123,7 @@ class Trader:
             s.render()
         for s in self.config.sell_strategies:
             s.render()
+        pass
 
     def render(self, historical_data=None):
 

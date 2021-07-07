@@ -41,6 +41,8 @@ class DummyExchange():
     def get_historic_data(self, granularity, start_date: datetime = None, end_date: datetime = None):
         if self.data_file is not None:
             df = pd.read_csv(self.data_file)
+            df.drop('date', axis=1)
+            df['date'] = df.apply(lambda a: datetime.fromtimestamp(a["epoch"], tz=timezone.utc), axis=1)
             df.set_index('date', inplace=True)
             return df
         else:
@@ -64,7 +66,7 @@ class DummyExchange():
             'price': close,
             'action': SignalAction.BUY,
             'fee': quote_quantity * fee,
-            'date': datetime.utcnow()
+            'sim': True
         })
 
     def market_sell(self, base_quantity: float, close: float):
@@ -81,7 +83,7 @@ class DummyExchange():
             'price': close,
             'action': SignalAction.SELL,
             'fee': value_sold * fee,
-            'date': datetime.utcnow()
+            'sim': True
         })
 
     def get_last_action(self):

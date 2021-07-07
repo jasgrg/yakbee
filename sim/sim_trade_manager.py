@@ -30,12 +30,12 @@ class SimTradeManager(TradeManager):
             orders = [o for o in trader.exchange.get_filled_orders() if o['date'] > self.start_date]
             orders.reverse()
             for trade in orders:
-                self.log.info(f"{trader.config.name} | {trade['date']} | {trade['action']} | {trade['size']} | {trade['price']} | {trade['size'] * trade['price']} ")
+                self.log.info(f"{trader.config.name} | {trade['date']} | {' * ' if trade.get('sim', False) else '   '} | {trade['action']} | {trade['size']} | {trade['price']} | {trade['size'] * trade['price']} ")
             base_amt = trader.exchange.get_available_amount(trader.config.base_currency)
             quote_amt = trader.exchange.get_available_amount(trader.config.quote_currency)
             self.log.info(f'{trader.config.name} finished with {base_amt} {trader.config.base_currency} | {quote_amt} {trader.config.quote_currency}')
             trader.render_strategies()
-            trader.render()
+            trader.render(trader.historical_data)
 
     def create_traders(self, config: Config) -> []:
         traders = []

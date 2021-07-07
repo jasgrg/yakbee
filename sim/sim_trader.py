@@ -17,7 +17,7 @@ class SimTrader(Trader):
 
     def get_historical_data(self, current_timestamp):
         self.current_time = datetime.fromtimestamp(current_timestamp).astimezone(timezone.utc)
-        return self.historical_data.loc[self.historical_data['epoch'] <= current_timestamp].copy()
+        return self.historical_data.loc[self.historical_data['epoch'] <= current_timestamp].tail(300).copy()
 
     def trade(self, action: SignalAction, close: float):
         if super().trade(action, close):

@@ -83,6 +83,6 @@ class ExponentialMovingAverageCrossover(Signal):
         plt.legend()
         plt.ylabel('Close')
 
-        # for action in self.action_list:
-        #     plt.plot(action['time'], action['close'], 'g*' if action['action'] == SignalAction.BUY else 'r*', markersize=10, label='Buy' if action['action'] == SignalAction.BUY else 'Sell')
+        for action in self.action_list:
+            plt.plot(action['time'], action['close'], 'g*' if action['action'] == SignalAction.BUY else 'r*', markersize=10, label='Buy' if action['action'] == SignalAction.BUY else 'Sell')
         plt.savefig(filename)
