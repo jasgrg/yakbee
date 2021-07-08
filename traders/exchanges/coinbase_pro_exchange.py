@@ -26,6 +26,9 @@ class CoinBaseProExchange():
         self.filled_orders = None
         self.last_filled_orders_fetch = None
 
+        self.accounts = None
+        self.last_accounts_fetch = None
+
     def get_historic_data(self, granularity, start_date_time: datetime = None, end_date_time: datetime = None, retry=0):
         if granularity not in [60, 300, 900, 3600, 21600, 86400]:
             raise Exception(f'Invalid granularity {granularity}')
@@ -132,18 +135,29 @@ class CoinBaseProExchange():
     def get_available_amount(self, currency) -> float:
         return float(self.get_account(currency)[0]["available"])
 
-    def get_account(self, currency, retry=0):
-        self.log.debug('Getting account')
+    def get_accounts(self, retry=0):
+        self.log.debug('Getting accounts')
+
+        if self.accounts is not None:
+            seconds = datetime.now().timestamp() - self.last_accounts_fetch
+            if seconds < 30:
+                self.log.debug(f'Cache hit on accounts')
+                return self.accounts
 
         resp = requests.get(f'{self.api_url}/accounts', auth=self)
         if resp.status_code == 200:
-            accounts = resp.json()
-            return [acc for acc in accounts if acc['currency'] == currency]
+            self.accounts = resp.json()
+            self.last_accounts_fetch = datetime.now().timestamp()
+            return self.accounts
         elif retry < 3:
             self.log.debug(f'Getting account failed {resp.status_code} retrying {retry}')
-            return self.get_account(currency, retry + 1)
+            return self.get_accounts(retry + 1)
         else:
             resp.raise_for_status()
+
+    def get_account(self, currency):
+        accounts = self.get_accounts()
+        return [acc for acc in accounts if acc['currency'] == currency]
 
     def market_buy(self, quote_quantity: float, close: float):
         funds = self._make_conform_to_increment(quote_quantity, self._get_quote_increment())

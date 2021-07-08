@@ -28,42 +28,35 @@ class ExponentialMovingAverageCrossover(Signal):
         gt_co_col = f'{gt_col}_cross_over'
         lt_co_col = f'{lt_col}_cross_over'
 
-        if not short_col in df.columns:
-            df[short_col] = df.close.ewm(span=self.short, adjust=False).mean()
-        if not long_col in df.columns:
-            df[long_col] = df.close.ewm(span=self.long, adjust=False).mean()
+        df[short_col] = df.close.ewm(span=self.short, min_periods=self.short, adjust=False).mean()
+        df[long_col] = df.close.ewm(span=self.long, min_periods=self.long, adjust=False).mean()
 
-        if not gt_col in df.columns:
-            df[gt_col] = df[short_col] > df[long_col]
-        if not gt_co_col in df.columns:
-            df[gt_co_col] = df[gt_col].ne(df[gt_col].shift())
-            df.loc[df[gt_col] == False, gt_co_col] = False
-
-        if not lt_col in df.columns:
-            df[lt_col] = df[short_col] < df[long_col]
-        if not lt_co_col in df.columns:
-            df[lt_co_col] = df[lt_col].ne(df[lt_col].shift())
-            df.loc[df[lt_col] == False, lt_co_col] = False
-
-        if not gt_co_col in df.columns:
-            df[gt_co_col] = df[gt_col].ne(df[gt_col].shift())
+        df[gt_col] = df[short_col] > df[long_col]
+        df[gt_co_col] = df[gt_col].ne(df[gt_col].shift())
         df.loc[df[gt_col] == False, gt_co_col] = False
 
-        if not lt_co_col in df.columns:
-            df[lt_co_col] = df[lt_col].ne(df[lt_col].shift())
+        df[lt_col] = df[short_col] < df[long_col]
+        df[lt_co_col] = df[lt_col].ne(df[lt_col].shift())
+        df.loc[df[lt_col] == False, lt_co_col] = False
+
+        df[gt_co_col] = df[gt_col].ne(df[gt_col].shift())
+        df.loc[df[gt_col] == False, gt_co_col] = False
+
+        df[lt_co_col] = df[lt_col].ne(df[lt_col].shift())
         df.loc[df[lt_col] == False, lt_co_col] = False
 
         latest_interval = df.tail(1)
 
-        self.log.debug(f'Exponential Moving Average Signal: {short_col} {latest_interval[short_col].values[0]} | {long_col} {latest_interval[long_col].values[0]}')
+
+        self.log.debug(f'Exponential Moving Average Signal: {short_col} {latest_interval[short_col].values[0]} | {long_col} {latest_interval[long_col].values[0]} at {latest_interval.index.values[0]} | {latest_interval.close.values[0]}')
 
         action = SignalAction.WAIT
 
         if latest_interval[gt_co_col].values[0] == True:
-            self.log.debug(f'{short_col} {latest_interval[short_col].values[0]} has crossed over {long_col} {latest_interval[long_col].values[0]}')
+            self.log.debug(f'{short_col} {latest_interval[short_col].values[0]} has crossed over {long_col} {latest_interval[long_col].values[0]} at {latest_interval.index.values[0]}')
             action = SignalAction.BUY
         elif latest_interval[lt_co_col].values[0] == True:
-            self.log.debug(f'{short_col} {latest_interval[short_col].values[0]} has crossed under {long_col} {latest_interval[long_col].values[0]}')
+            self.log.debug(f'{short_col} {latest_interval[short_col].values[0]} has crossed under {long_col} {latest_interval[long_col].values[0]} at {latest_interval.index.values[0]}')
             action = SignalAction.SELL
 
         if action != SignalAction.WAIT:

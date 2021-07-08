@@ -21,10 +21,11 @@ class Trader:
     def calculate_and_trade(self, current_time):
 
         time_since_last_calc = current_time - self.last_calc_date
+        current_time_str = datetime.fromtimestamp(current_time).strftime("%Y-%m-%d %H:%M:%S")
 
         if time_since_last_calc >= self.config.granularity:
 
-            self.log.info(f'{self.config.name} running calculations {datetime.fromtimestamp(current_time).strftime("%Y-%m-%d %H:%M:%S")}')
+            self.log.debug(f'{self.config.name} running calculations {current_time_str}')
             self.last_calc_date = current_time
 
             historical_data = self.get_historical_data(current_time)
@@ -43,16 +44,15 @@ class Trader:
 
                         if self.config.buy_near_high or close < high_threshold:
 
-                            self.log.debug('*** Strategy returned BUY ***')
                             self.last_action = SignalAction.BUY
-
+                            self.log.info(f'{self.config.alias} performing buy at {current_time_str}')
                             if self.trade(SignalAction.BUY, close):
                                 self.log.debug('*** Buy was successful ***')
                                 if self.config.live:
                                     self.notify_service.notify(f'{self.config.name} bought at {close}')
                             break
                         else:
-                            self.log.debug(f'Cannot buy near or above high : current price {close} : high threshold : {high_threshold}')
+                            self.log.info(f'Cannot buy near or above high : current price {close} : high threshold : {high_threshold}')
 
                 for strategy in self.config.sell_strategies:
 
@@ -60,11 +60,9 @@ class Trader:
 
                     if action == SignalAction.SELL and self.last_action != SignalAction.SELL:
 
-                        self.log.debug('*** Strategy returned SELLs ***')
                         last_buy_order = self.exchange.get_last_buy_order()
-
                         if self.config.sell_at_loss or last_buy_order is None or close > (float(last_buy_order['price']) + ((self.config.min_gain_to_sell / 100) * float(last_buy_order['price']))):
-
+                            self.log.info(f'{self.config.alias} performing sell at {current_time_str}')
                             self.last_action = SignalAction.SELL
 
                             if self.trade(SignalAction.SELL, close):
@@ -73,7 +71,7 @@ class Trader:
                                     self.notify_service.notify(f'{self.config.name} sold at {historical_data.tail(1).close.values[0]}')
                             break
                         else:
-                            self.log.debug(f'Cannot sell at a loss : current price {close} : purchased price {last_buy_order["price"]} : target {(float(last_buy_order["price"]) + ((self.config.min_gain_to_sell / 100) * float(last_buy_order["price"])))}')
+                            self.log.info(f'Cannot sell at a loss : current price {close} : purchased price {last_buy_order["price"]} : target {(float(last_buy_order["price"]) + ((self.config.min_gain_to_sell / 100) * float(last_buy_order["price"])))}')
 
                 if self.render_after_calc:
                     try:

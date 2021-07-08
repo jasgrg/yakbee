@@ -56,14 +56,16 @@ class MovingAverageCrossover(Signal):
 
         latest_interval = df.tail(1)
 
-        self.log.debug(f'Moving Average Signals: short {latest_interval[short_col].values[0]} | long {latest_interval[long_col].values[0]}')
+        self.log.info(f'Moving Average Signals: short {latest_interval[short_col].values[0]} | long {latest_interval[long_col].values[0]}')
 
         action = SignalAction.WAIT
 
         if latest_interval[gt_co_col].values[0] == True:
+            self.log.info(df)
             self.log.debug(f'{short_col} {latest_interval[short_col].values[0]} has crossed over {long_col} {latest_interval[long_col].values[0]}')
             action = SignalAction.BUY
         elif latest_interval[lt_co_col].values[0] == True:
+            self.log.info(df)
             self.log.debug(f'{short_col} {latest_interval[short_col].values[0]} has crossed under {long_col} {latest_interval[long_col].values[0]}')
             action = SignalAction.SELL
 
