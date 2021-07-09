@@ -10,6 +10,7 @@ from traders.signals.three_white_soldiers import ThreeWhiteSoldiers
 from traders.signals.macd_crossover import MACDCrossover
 from traders.signals.elder_ray import ElderRay
 from traders.signals.trailing_stop_loss import TrailingStopLoss
+from traders.signals.bollinger_bands import BollingerBands
 
 from traders.strategy import Strategy
 
@@ -26,7 +27,8 @@ signal_defs = {
     'macd_crossover': MACDCrossover,
     'golden_cross': MovingAverage,
     'elder_ray': ElderRay,
-    'trailing_stop_loss': TrailingStopLoss
+    'trailing_stop_loss': TrailingStopLoss,
+    'bollinger_bands': BollingerBands
 
 }
 
@@ -44,18 +46,21 @@ class TraderConfig:
         self.live = config['live']
         self.buy_strategies = self.get_strategies(config['config']['buy_strategies'], log)
         self.sell_strategies = self.get_strategies(config['config']['sell_strategies'], log)
+        self.non_trading_signals = self.get_signals(config['config'].get('non_trading_signals', []), log)
         self.auth = config['auth']
 
     def get_strategies(self, strategies, log):
         strats = []
         for strategy in strategies:
-            signals = []
-            for sig in strategy:
-                if isinstance(sig, str):
-                    signals.append(signal_defs[sig](log, self.alias))
-                else:
-                    signals.append(signal_defs[sig['signal']](log, self.alias, sig))
-
-
+            signals = self.get_signals(strategy, log)
             strats.append(Strategy(signals))
         return strats
+
+    def get_signals(self, signals, log):
+        sigs = []
+        for signal in signals:
+            if isinstance(signal, str):
+                sigs.append(signal_defs[signal](log, self.alias))
+            else:
+                sigs.append(signal_defs[signal['signal']](log, self.alias, signal))
+        return sigs

@@ -73,6 +73,11 @@ class Trader:
                         else:
                             self.log.info(f'Cannot sell at a loss : current price {close} : purchased price {last_buy_order["price"]} : target {(float(last_buy_order["price"]) + ((self.config.min_gain_to_sell / 100) * float(last_buy_order["price"])))}')
 
+                for signal in self.config.non_trading_signals:
+                    signal.set_last_order(last_order)
+                    signal.get_action(historical_data)
+                    signal.render(historical_data)
+
                 if self.render_after_calc:
                     try:
                         self.render(historical_data)

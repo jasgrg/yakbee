@@ -82,7 +82,8 @@ This file is not in source control so before running yakbee you'll need to creat
                                 "percent": 2
                             }
                         ]
-                    ]
+                    ],
+                    "non_trading_signals": ["bollinger_bands"]
                 }
             }
         ],
@@ -135,6 +136,7 @@ trade with live funds.
   - <code>sell_strategies</code> if not strategies return a buy action, then the sell strategies are consulted. If *any*
   sell strategy returns a sell action then a sell is executed. In order for a strategy to return a sell action, *all* of the 
   signals within the strategy must return a sell signal.
+  - <code>non_trading_signals</code> *optional* signals that are calculated and graphed but do not affect trading decisions.
 
 ## How it works
 
@@ -211,6 +213,8 @@ arbitrarily combined in a way that best supports your trading style and goals.
 
 Available signals:
 
+- <code>bollinger_bands</code>: [description](https://www.investopedia.com/terms/b/bollingerbands.asp)
+    - <code>span</code> *optional default: 20*
 - <code>elder_ray</code>: [description](https://www.investopedia.com/terms/e/elderray.asp)
     - <code>span</code> *optional default: 13*
 - <code>exponential_moving_average</code> : Returns BUY/SELL if the short term exponential moving average (ema) is above/under the long term ema.
