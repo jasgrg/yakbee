@@ -58,9 +58,9 @@ class MACDCrossover(Signal):
         latest_interval = df.tail(1)
 
         action = SignalAction.WAIT
-        if latest_interval['macd_gt_signal_crossover'].values[0] is True:
+        if latest_interval['macd_gt_signal_crossover'].values[0] == True:
             action = SignalAction.BUY
-        elif latest_interval['macd_lt_signal_crossover'].values[0] is True:
+        elif latest_interval['macd_lt_signal_crossover'].values[0] == True:
             action = SignalAction.SELL
 
         return action

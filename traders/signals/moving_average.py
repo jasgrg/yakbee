@@ -53,10 +53,13 @@ class MovingAverage(Signal):
         if action != SignalAction.WAIT:
             self._add_action(action, latest_interval.index.values[0], latest_interval.close.values[0])
 
+        self._add_to_history(latest_interval)
+
         return action
 
 
     def render(self, df):
+        df = self.history
         filename = f'graphs/{self.alias}_moving_average.png'
 
         self.log.debug(f'Moving Average Signal: Rendering chart {filename}')

@@ -41,8 +41,10 @@ class ThreeWhiteSoldiers(Signal):
         plt.plot(df.close, label='close')
         plt.legend()
         plt.ylabel('Close')
+        min_date = df.epoch.values[0]
+        actions = [o for o in self.action_list if o['epoch'] > min_date]
 
-        for action in self.action_list:
+        for action in actions:
             plt.plot(action['time'], action['close'], 'g*' if action['action'] == SignalAction.BUY else 'r*', markersize=10, label='Buy' if action['action'] == SignalAction.BUY else 'Sell')
 
         plt.savefig(filename)

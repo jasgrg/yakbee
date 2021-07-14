@@ -52,24 +52,22 @@ class MACD(Signal):
         latest_interval = df.tail(1)
 
         action = SignalAction.WAIT
-        if latest_interval['macd_gt_signal'].values[0] is True:
+        if latest_interval['macd_gt_signal'].values[0] == True:
             action = SignalAction.BUY
-        elif latest_interval['macd_lt_signal'].values[0] is True:
+        elif latest_interval['macd_lt_signal'].values[0] == True:
             action = SignalAction.SELL
 
-        #self.render(df)
+        self._add_to_history(latest_interval)
 
         return action
 
-
-
     def render(self, df):
+        df = self.history
         filename = f'graphs/{self.alias}_macd.png'
 
         self.log.debug(f'Exponential Moving Average Signal: Rendering chart {filename}')
         plt.close('all')
         plt.xticks(rotation=45)
-        #plt.plot(df.close, label='close')
         plt.plot(df.macd, label='macd')
         plt.plot(df.macd_signal, label='signal')
         plt.legend()

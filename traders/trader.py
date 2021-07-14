@@ -16,6 +16,7 @@ class Trader:
         self.exchange = self.get_exchange(config['exchange'])
         self.last_action = self.exchange.get_last_action()
         self.render_after_calc = True
+        self.last_log_time = 0
         self.log.debug(f'{self.config.name} created')
 
     def calculate_and_trade(self, current_time):
@@ -45,14 +46,15 @@ class Trader:
                         if self.config.buy_near_high or close < high_threshold:
 
                             self.last_action = SignalAction.BUY
-                            self.log.info(f'{self.config.alias} performing buy at {current_time_str}')
+                            self.log.info(f'{self.config.alias} performing buy at {current_time_str} based off {strategy.name} strategy')
                             if self.trade(SignalAction.BUY, close):
                                 self.log.debug('*** Buy was successful ***')
+                                self.render(historical_data)
                                 if self.config.live:
                                     self.notify_service.notify(f'{self.config.name} bought at {close}')
                             break
                         else:
-                            self.log.info(f'Cannot buy near or above high : current price {close} : high threshold : {high_threshold}')
+                            self.log.debug(f'Cannot buy near or above high : current price {close} : high threshold : {high_threshold}')
 
                 for strategy in self.config.sell_strategies:
 
@@ -61,17 +63,21 @@ class Trader:
                     if action == SignalAction.SELL and self.last_action != SignalAction.SELL:
 
                         last_buy_order = self.exchange.get_last_buy_order()
-                        if self.config.sell_at_loss or last_buy_order is None or close > (float(last_buy_order['price']) + ((self.config.min_gain_to_sell / 100) * float(last_buy_order['price']))):
-                            self.log.info(f'{self.config.alias} performing sell at {current_time_str}')
+
+                        sell_at_loss = strategy.sell_at_loss if strategy.sell_at_loss is not None else self.config.sell_at_loss
+
+                        if sell_at_loss or last_buy_order is None or close > (float(last_buy_order['price']) + ((self.config.min_gain_to_sell / 100) * float(last_buy_order['price']))):
+                            self.log.info(f'{self.config.alias} performing sell at {current_time_str} based off {strategy.name} strategy')
                             self.last_action = SignalAction.SELL
 
                             if self.trade(SignalAction.SELL, close):
                                 self.log.debug('*** Sell was successful ***')
+                                self.render(historical_data)
                                 if self.config.live:
                                     self.notify_service.notify(f'{self.config.name} sold at {historical_data.tail(1).close.values[0]}')
                             break
                         else:
-                            self.log.info(f'Cannot sell at a loss : current price {close} : purchased price {last_buy_order["price"]} : target {(float(last_buy_order["price"]) + ((self.config.min_gain_to_sell / 100) * float(last_buy_order["price"])))}')
+                            self.log.debug(f'Cannot sell at a loss : current price {close} : purchased price {last_buy_order["price"]} : target {(float(last_buy_order["price"]) + ((self.config.min_gain_to_sell / 100) * float(last_buy_order["price"])))}')
 
                 for signal in self.config.non_trading_signals:
                     signal.set_last_order(last_order)
@@ -88,6 +94,18 @@ class Trader:
                         self.log.warning(f'failed to render trades or strategies')
 
                 self.notify_amounts(close)
+
+                time_since_last_log = current_time - self.last_log_time
+                if time_since_last_log >= 60 * 60 * 24:
+                    self.render(historical_data)
+                    amounts = self.get_amounts(close)
+                    self.last_log_time = current_time
+                    self.log.info(f'{amounts["base_amount"]} ' +
+                                    f'{amounts["base_currency"]} | ' +
+                                    f'{amounts["quote_amount"]} ' +
+                                    f'{amounts["quote_currency"]} | ' +
+                                    f'{amounts["total"]} | {current_time_str}')
+
 
 
     def get_historical_data(self, current_time):
@@ -107,10 +125,10 @@ class Trader:
             return False
 
         if action == SignalAction.BUY:
-            self.log.info(f"*** Performing market buy of {quote_currency_amount} at {close}")
+            self.log.info(f"*** Performing market buy of {quote_currency_amount} at {close} | {quote_currency_amount}")
             self.exchange.market_buy(quote_currency_amount, close)
         elif action == SignalAction.SELL:
-            self.log.info(f"*** Performing market sell of {base_currency_amount} at {close}")
+            self.log.info(f"*** Performing market sell of {base_currency_amount} at {close} | {base_currency_amount * close}")
             self.exchange.market_sell(base_currency_amount, close)
 
         return True
@@ -121,14 +139,11 @@ class Trader:
             x = DummyExchange(x, self.config, self.log)
         return x
 
-    def render_strategies(self):
+    def render(self, historical_data=None):
         for s in self.config.buy_strategies:
             s.render()
         for s in self.config.sell_strategies:
             s.render()
-        pass
-
-    def render(self, historical_data=None):
 
         if historical_data is None:
             historical_data = self.get_historical_data(self.last_calc_date)
@@ -162,16 +177,19 @@ class Trader:
         if exchange == 'coinbasepro':
             return CoinBaseProExchange(self.market, self.config, self.log)
 
-    def notify_amounts(self, close):
+    def get_amounts(self, close):
         base_amount = self.exchange.get_available_amount(self.config.base_currency)
         quote_amount = self.exchange.get_available_amount(self.config.quote_currency)
 
-        self.notify_service.notify({
+        return {
             "alias": self.config.alias,
             "base_amount": base_amount,
             "base_currency": self.config.base_currency,
             "quote_amount": quote_amount,
             "quote_currency": self.config.quote_currency,
             "total": (base_amount * close) + quote_amount
-        })
+        }
+
+    def notify_amounts(self, close):
+        self.notify_service.notify(self.get_amounts(close))
 

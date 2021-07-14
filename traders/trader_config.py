@@ -1,36 +1,4 @@
-from traders.signals.moving_average import MovingAverage
-from traders.signals.moving_average_crossover import MovingAverageCrossover
-from traders.signals.exponential_moving_average import ExponentialMovingAverage
-from traders.signals.exponential_moving_average_crossover import ExponentialMovingAverageCrossover
-from traders.signals.macd import MACD
-from traders.signals.moving_average_slope import MovingAverageSlope
-from traders.signals.exponential_moving_average_slope import ExponentialMovingAverageSlope
-from traders.signals.three_black_crows import ThreeBlackCrows
-from traders.signals.three_white_soldiers import ThreeWhiteSoldiers
-from traders.signals.macd_crossover import MACDCrossover
-from traders.signals.elder_ray import ElderRay
-from traders.signals.trailing_stop_loss import TrailingStopLoss
-from traders.signals.bollinger_bands import BollingerBands
-
 from traders.strategy import Strategy
-
-signal_defs = {
-    'moving_average': MovingAverage,
-    'moving_average_slope': MovingAverageSlope,
-    'moving_average_crossover': MovingAverageCrossover,
-    'exponential_moving_average': ExponentialMovingAverage,
-    'exponential_moving_average_crossover': ExponentialMovingAverageCrossover,
-    'exponential_moving_average_slope': ExponentialMovingAverageSlope,
-    'macd': MACD,
-    'three_black_crows': ThreeBlackCrows,
-    'three_white_soldiers': ThreeWhiteSoldiers,
-    'macd_crossover': MACDCrossover,
-    'golden_cross': MovingAverage,
-    'elder_ray': ElderRay,
-    'trailing_stop_loss': TrailingStopLoss,
-    'bollinger_bands': BollingerBands
-
-}
 
 
 class TraderConfig:
@@ -46,21 +14,13 @@ class TraderConfig:
         self.live = config['live']
         self.buy_strategies = self.get_strategies(config['config']['buy_strategies'], log)
         self.sell_strategies = self.get_strategies(config['config']['sell_strategies'], log)
-        self.non_trading_signals = self.get_signals(config['config'].get('non_trading_signals', []), log)
+        self.non_trading_signals = [] #self.get_signals(config['config'].get('non_trading_signals', []), log)
         self.auth = config['auth']
 
     def get_strategies(self, strategies, log):
         strats = []
         for strategy in strategies:
-            signals = self.get_signals(strategy, log)
-            strats.append(Strategy(signals))
+            strats.append(Strategy(strategy, self.alias, log))
         return strats
 
-    def get_signals(self, signals, log):
-        sigs = []
-        for signal in signals:
-            if isinstance(signal, str):
-                sigs.append(signal_defs[signal](log, self.alias))
-            else:
-                sigs.append(signal_defs[signal['signal']](log, self.alias, signal))
-        return sigs
+
