@@ -1,4 +1,4 @@
-from traders.strategy import Strategy
+from traders.strategy import Strategy, get_signals
 
 
 class TraderConfig:
@@ -14,7 +14,7 @@ class TraderConfig:
         self.live = config['live']
         self.buy_strategies = self.get_strategies(config['config']['buy_strategies'], log)
         self.sell_strategies = self.get_strategies(config['config']['sell_strategies'], log)
-        self.non_trading_signals = [] #self.get_signals(config['config'].get('non_trading_signals', []), log)
+        self.non_trading_signals = get_signals(config['config'].get('non_trading_signals', []), self.alias, log)
         self.auth = config['auth']
 
     def get_strategies(self, strategies, log):

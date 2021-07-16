@@ -58,14 +58,17 @@ class MACDCrossover(Signal):
         latest_interval = df.tail(1)
 
         action = SignalAction.WAIT
-        if latest_interval['macd_gt_signal_crossover'].values[0] == True:
+        if latest_interval['macd_gt_signal_crossover'].values[0] == True and latest_interval['macd'].values[0] < 0:
             action = SignalAction.BUY
-        elif latest_interval['macd_lt_signal_crossover'].values[0] == True:
+        elif latest_interval['macd_lt_signal_crossover'].values[0] == True  and latest_interval['macd'].values[0] > 0:
             action = SignalAction.SELL
+
+        self._add_to_history(latest_interval)
 
         return action
 
     def render(self, df):
+        df = self.history
         filename = f'graphs/{self.alias}_macd_crossover.png'
 
         self.log.debug(f'MACD Crossover Signal: Rendering chart {filename}')

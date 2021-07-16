@@ -63,7 +63,7 @@ class ExponentialMovingAverage(Signal):
         self.log.debug(f'Exponential Moving Average Signal: Rendering chart {filename}')
         plt.close('all')
         plt.xticks(rotation=45)
-        plt.plot(df.close, label='close')
+        plt.plot(df.close, label="Close")
         plt.plot(df[self.short_col], label=self.short_col)
         plt.plot(df[self.long_col], label=self.long_col)
         plt.legend()

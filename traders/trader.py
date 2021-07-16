@@ -144,6 +144,8 @@ class Trader:
             s.render()
         for s in self.config.sell_strategies:
             s.render()
+        for s in self.config.non_trading_signals:
+            s.render(historical_data)
 
         if historical_data is None:
             historical_data = self.get_historical_data(self.last_calc_date)
