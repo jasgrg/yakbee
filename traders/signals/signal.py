@@ -6,10 +6,10 @@ import numpy as np
 class Signal():
     def __init__(self):
         # forces pandas to log all rows/columns
-        pd.set_option('display.max_rows', None)
-        pd.set_option('display.max_columns', None)
-        pd.set_option('display.width', None)
-        pd.set_option('display.max_colwidth', None)
+        # pd.set_option('display.max_rows', None)
+        # pd.set_option('display.max_columns', None)
+        # pd.set_option('display.width', None)
+        # pd.set_option('display.max_colwidth', None)
 
         plt.style.use('seaborn')
 
@@ -32,4 +32,4 @@ class Signal():
         if self.history is None:
             self.history = latest_interval.copy(deep=True)
         else:
-            self.history = self.history.append(latest_interval.copy(deep=True))
+            self.history = self.history.append(latest_interval.copy(deep=True)).tail(1000)
