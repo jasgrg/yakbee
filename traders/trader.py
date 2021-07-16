@@ -87,7 +87,6 @@ class Trader:
                 if self.render_after_calc:
                     try:
                         self.render(historical_data)
-                        self.render_strategies()
                     except Exception as ex:
                         # log and continue
                         self.log.debug(str(ex))
