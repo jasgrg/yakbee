@@ -14,7 +14,6 @@ class Trader:
         self.config = TraderConfig(config, log)
         self.market = f'{self.config.base_currency}-{self.config.quote_currency}'
         self.exchange = self.get_exchange(config['exchange'])
-        self.last_action = self.exchange.get_last_action()
         self.render_after_calc = True
         self.last_log_time = 0
         self.log.debug(f'{self.config.name} created')
@@ -32,6 +31,7 @@ class Trader:
             historical_data = self.get_historical_data(current_time)
 
             last_order = self.exchange.get_last_order()
+            last_action = self.exchange.get_last_action()
 
             if historical_data.shape[0] > 1:
                 close = historical_data.tail(1).close.values[0]
@@ -40,12 +40,11 @@ class Trader:
 
                     action = strategy.get_action(historical_data, last_order)
 
-                    if action == SignalAction.BUY and self.last_action != SignalAction.BUY:
+                    if action == SignalAction.BUY and last_action != SignalAction.BUY:
                         high_threshold = historical_data.close.max() * 0.97
 
                         if self.config.buy_near_high or close < high_threshold:
 
-                            self.last_action = SignalAction.BUY
                             self.log.info(f'{self.config.alias} performing buy at {current_time_str} based off {strategy.name} strategy')
                             if self.trade(SignalAction.BUY, close):
                                 self.log.debug('*** Buy was successful ***')
@@ -60,7 +59,7 @@ class Trader:
 
                     action = strategy.get_action(historical_data, last_order)
 
-                    if action == SignalAction.SELL and self.last_action != SignalAction.SELL:
+                    if action == SignalAction.SELL and last_action != SignalAction.SELL:
 
                         last_buy_order = self.exchange.get_last_buy_order()
 
@@ -68,7 +67,6 @@ class Trader:
 
                         if sell_at_loss or last_buy_order is None or close > (float(last_buy_order['price']) + ((self.config.min_gain_to_sell / 100) * float(last_buy_order['price']))):
                             self.log.info(f'{self.config.alias} performing sell at {current_time_str} based off {strategy.name} strategy')
-                            self.last_action = SignalAction.SELL
 
                             if self.trade(SignalAction.SELL, close):
                                 self.log.debug('*** Sell was successful ***')
