@@ -36,9 +36,17 @@ signal_defs = {
 
 }
 
+class SignalEntry():
+    def __init__(self, name, signal):
+        self.name = name
+        self.signal = signal
+
 
 class Strategy():
     def __init__(self, strategy, alias, log):
+        self.log = log
+        self.alias = alias
+
         if not isinstance(strategy, dict):
             self.signals = get_signals(strategy, alias, log)
             self.name = 'Unnamed'
@@ -59,8 +67,10 @@ class Strategy():
         votes = []
 
         for s in self.signals:
-            s.set_last_order(last_order)
-            votes.append(s.get_action(historical_data))
+            s.signal.set_last_order(last_order)
+            vote = s.signal.get_action(historical_data)
+            self.log.debug(f'{self.alias}: {self.name} - {s.name} - {str(vote)}')
+            votes.append(vote)
 
         # all signals must agree to initiate a trade
         if all(vote == SignalAction.BUY for vote in votes):
@@ -74,14 +84,14 @@ class Strategy():
         if self.historical_data is None:
             return
         for s in self.signals:
-            s.render(self.historical_data)
+            s.signal.render(self.historical_data)
 
 
 def get_signals(signals, alias, log):
     sigs = []
     for signal in signals:
         if isinstance(signal, str):
-            sigs.append(signal_defs[signal](log, alias))
+            sigs.append(SignalEntry(signal, signal_defs[signal](log, alias)))
         else:
-            sigs.append(signal_defs[signal['signal']](log, alias, signal))
+            sigs.append(SignalEntry(signal['signal'], signal_defs[signal['signal']](log, alias, signal)))
     return sigs
