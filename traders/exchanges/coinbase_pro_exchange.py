@@ -159,7 +159,8 @@ class CoinBaseProExchange():
         accounts = self.get_accounts()
         return [acc for acc in accounts if acc['currency'] == currency]
 
-    def market_buy(self, quote_quantity: float, close: float):
+    def market_buy(self, quote_quantity: float, close: float, retry=0):
+
         funds = self._make_conform_to_increment(quote_quantity, self._get_quote_increment())
 
         order = {
@@ -172,9 +173,16 @@ class CoinBaseProExchange():
         self.log.debug(order)
 
         resp = requests.post(f'{self.base_url}/orders', json=order, auth=self)
-        resp.raise_for_status()
+        if resp.status_code == 200:
+            return
+        elif retry < 3:
+            self.log.debug(f'market buy failed, retrying {retry}')
+            self.market_buy(quote_quantity, close, retry + 1)
+        else:
+            resp.raise_for_status()
 
-    def market_sell(self, base_quantity, close: float):
+
+    def market_sell(self, base_quantity, close: float, retry=0):
         base_increment = self._get_base_increment()
         qty = self._make_conform_to_increment(base_quantity, base_increment)
 
@@ -186,7 +194,13 @@ class CoinBaseProExchange():
         }
 
         resp = requests.post(f'{self.base_url}/orders', json=order, auth=self)
-        resp.raise_for_status()
+        if resp.status_code == 200:
+            return
+        elif retry < 3:
+            self.log.debug(f'market sell failed, retrying {retry}')
+            self.market_sell(base_quantity, close, retry+1)
+        else:
+            resp.raise_for_status()
 
     def get_filled_orders(self, retry=0):
         self.log.debug('Getting filled orders')

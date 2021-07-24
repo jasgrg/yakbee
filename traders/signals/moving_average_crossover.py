@@ -56,26 +56,27 @@ class MovingAverageCrossover(Signal):
 
         latest_interval = df.tail(1)
 
-        self.log.info(f'Moving Average Signals: short {latest_interval[short_col].values[0]} | long {latest_interval[long_col].values[0]}')
+        self.log.debug(f'Moving Average Signals: short {latest_interval[short_col].values[0]} | long {latest_interval[long_col].values[0]}')
 
         action = SignalAction.WAIT
 
         if latest_interval[gt_co_col].values[0] == True:
-            self.log.info(df)
             self.log.debug(f'{short_col} {latest_interval[short_col].values[0]} has crossed over {long_col} {latest_interval[long_col].values[0]}')
             action = SignalAction.BUY
         elif latest_interval[lt_co_col].values[0] == True:
-            self.log.info(df)
             self.log.debug(f'{short_col} {latest_interval[short_col].values[0]} has crossed under {long_col} {latest_interval[long_col].values[0]}')
             action = SignalAction.SELL
 
         if action != SignalAction.WAIT:
             self._add_action(action, latest_interval.index.values[0], latest_interval.close.values[0])
-        #self.render(df)
+
+        self._add_to_history(latest_interval)
+
         return action
 
 
     def render(self, df):
+        df = self.history
         filename = f'graphs/{self.alias}_moving_average_crossover.png'
 
         self.log.debug(f'Moving Average Signal: Rendering chart {filename}')
@@ -87,7 +88,7 @@ class MovingAverageCrossover(Signal):
         plt.legend()
         plt.ylabel('Close')
 
-        # for action in self.action_list:
-        #     plt.plot(action['time'], action['close'], 'g*' if action['action'] == SignalAction.BUY else 'r*', markersize=10, label='Buy' if action['action'] == SignalAction.BUY else 'Sell')
+        for action in self.action_list:
+            plt.plot(action['time'], action['close'], 'g*' if action['action'] == SignalAction.BUY else 'r*', markersize=10, label='Buy' if action['action'] == SignalAction.BUY else 'Sell')
 
         plt.savefig(filename)
