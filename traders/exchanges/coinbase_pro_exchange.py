@@ -38,7 +38,6 @@ class CoinBaseProExchange():
             if start_date_time is None or end_date_time is None:
                 self.log.debug(f'Getting history | {granularity}')
                 resp = requests.get(f'{self.base_url}/products/{self.market}/candles?granularity={granularity}')
-                self.log.error(f'Status {resp.status_code} : {resp.text}')
                 resp.raise_for_status()
                 data = resp.json()
             else:
@@ -57,7 +56,6 @@ class CoinBaseProExchange():
                         self.log.debug(f'Getting history {cur_start_time} - {cur_end_time} | {granularity}')
                         resp = requests.get(
                             f'{self.base_url}/products/{self.market}/candles?granularity={granularity}&start={cur_start_time.isoformat()}&end={cur_end_time.isoformat()}')
-                        self.log.error(f'Status {resp.status_code} : {resp.text}')
                         resp.raise_for_status()
                         data.extend(resp.json())
                         if cur_end_time >= end_date_time:
@@ -71,7 +69,6 @@ class CoinBaseProExchange():
                     self.log.debug(f'Getting history {start_date_time} - {end_date_time} | {granularity}')
                     resp = requests.get(
                         f'{self.base_url}/products/{self.market}/candles?granularity={granularity}&start={start_date_time.isoformat()}&end={end_date_time.isoformat()}')
-                    self.log.error(f'Status {resp.status_code} : {resp.text}')
                     resp.raise_for_status()
                     data = resp.json()
 
