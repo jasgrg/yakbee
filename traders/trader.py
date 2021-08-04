@@ -5,10 +5,11 @@ from traders.exchanges.dummy_exchange import DummyExchange
 from notifications.notification_service import NotificationService
 import matplotlib.pyplot as plt
 from datetime import datetime
+from helpers import datetime_helpers
 
 class Trader:
     def __init__(self, config, log, notify_service = None):
-        self.last_calc_date = 0
+        self.next_calc_time = 0
         self.log = log
         self.notify_service = notify_service or NotificationService()
         self.config = TraderConfig(config, log)
@@ -20,10 +21,9 @@ class Trader:
 
     def calculate_and_trade(self, current_time):
 
-        time_since_last_calc = current_time - self.last_calc_date
         current_time_str = datetime.fromtimestamp(current_time).strftime("%Y-%m-%d %H:%M:%S")
 
-        if time_since_last_calc >= self.config.granularity:
+        if current_time >= self.next_calc_time:
 
             self.log.debug(f'{self.config.name} running calculations {current_time_str}')
             self.last_calc_date = current_time
@@ -103,6 +103,7 @@ class Trader:
                                     f'{amounts["quote_currency"]} | ' +
                                     f'{amounts["total"]} | {current_time_str}')
 
+            self.next_calc_time = datetime_helpers.ceil_dt(current_time, self.config.granularity)
 
 
     def get_historical_data(self, current_time):
