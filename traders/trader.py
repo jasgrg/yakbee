@@ -103,7 +103,7 @@ class Trader:
                                     f'{amounts["quote_currency"]} | ' +
                                     f'{amounts["total"]} | {current_time_str}')
 
-            self.next_calc_time = datetime_helpers.ceil_dt(current_time, self.config.granularity)
+            self.next_calc_time = datetime_helpers.get_next_calc_time(current_time, self.config.granularity)
 
 
     def get_historical_data(self, current_time):
