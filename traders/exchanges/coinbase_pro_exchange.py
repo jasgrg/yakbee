@@ -266,3 +266,9 @@ class CoinBaseProExchange():
         orders = self.get_filled_orders()
         orders = [o for o in orders if o['action'] == SignalAction.BUY]
         return orders[0] if len(orders) > 0 else None
+
+    def get_min_buy_amount(self):
+        return float(self.product['min_market_funds'])
+
+    def get_min_sell_amount(self):
+        return float(self.product['base_min_size'])

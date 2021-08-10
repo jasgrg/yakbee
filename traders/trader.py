@@ -38,7 +38,7 @@ class Trader:
 
                 for strategy in self.config.buy_strategies:
 
-                    action = strategy.get_action(historical_data, last_order)
+                    action = SignalAction.BUY # strategy.get_action(historical_data, last_order)
 
                     if action == SignalAction.BUY and last_action != SignalAction.BUY:
                         high_threshold = historical_data.close.max() * 0.97
@@ -54,6 +54,7 @@ class Trader:
                             break
                         else:
                             self.log.debug(f'Cannot buy near or above high : current price {close} : high threshold : {high_threshold}')
+                            self.notify_service.notify(f'Cannot buy near or above high : current price {close} : high threshold : {high_threshold}')
 
                 for strategy in self.config.sell_strategies:
 
@@ -76,6 +77,7 @@ class Trader:
                             break
                         else:
                             self.log.debug(f'Cannot sell at a loss : current price {close} : purchased price {last_buy_order["price"]} : target {(float(last_buy_order["price"]) + ((self.config.min_gain_to_sell / 100) * float(last_buy_order["price"])))}')
+                            self.notify_service.notify(f'Cannot sell at a loss : current price {close} : purchased price {last_buy_order["price"]} : target {(float(last_buy_order["price"]) + ((self.config.min_gain_to_sell / 100) * float(last_buy_order["price"])))}')
 
                 for signal in self.config.non_trading_signals:
                     signal.set_last_order(last_order)
@@ -114,13 +116,21 @@ class Trader:
         base_currency_amount = self.exchange.get_available_amount(self.config.base_currency)
         quote_currency_amount = self.exchange.get_available_amount(self.config.quote_currency)
 
-        if action == SignalAction.BUY and quote_currency_amount == 0:
-            self.log.debug(f'Action is buy but balance is 0 {self.config.quote_currency}')
-            return False
 
-        if action == SignalAction.SELL and base_currency_amount == 0:
-            self.log.debug(f'Action is sell but balance is 0 {self.config.base_currency}')
-            return False
+
+        if action == SignalAction.BUY:
+            min_buy_amount = self.exchange.get_min_buy_amount()
+            if quote_currency_amount < min_buy_amount:
+                self.log.debug(f'Action is buy but balance is {quote_currency_amount} {self.config.quote_currency} which is less than the minimum of {min_buy_amount}')
+                self.notify_service.notify(
+                    f'Action is buy but balance is {quote_currency_amount} {self.config.quote_currency} which is less than the minimum of {min_buy_amount}')
+                return False
+
+        if action == SignalAction.SELL:
+            min_sell_amount = self.exchange.get_min_sell_amount()
+            if base_currency_amount < min_sell_amount:
+                self.log.debug(f'Action is sell but balance is {base_currency_amount} {self.config.base_currency} which is less than the minimum of {min_sell_amount}')
+                return False
 
         if action == SignalAction.BUY:
             self.log.info(f"*** Performing market buy of {quote_currency_amount} at {close} | {quote_currency_amount}")

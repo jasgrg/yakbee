@@ -99,3 +99,10 @@ class DummyExchange():
 
     def get_filled_orders(self):
         return self.orders
+
+
+    def get_min_buy_amount(self):
+        return self.base_exchange.get_min_buy_amount()
+
+    def get_min_sell_amount(self):
+        return self.base_exchange.get_min_sell_amount()
