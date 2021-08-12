@@ -38,7 +38,7 @@ class Trader:
 
                 for strategy in self.config.buy_strategies:
 
-                    action = SignalAction.BUY # strategy.get_action(historical_data, last_order)
+                    action = strategy.get_action(historical_data, last_order)
 
                     if action == SignalAction.BUY and last_action != SignalAction.BUY:
                         high_threshold = historical_data.close.max() * 0.97
